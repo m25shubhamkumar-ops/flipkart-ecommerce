@@ -36,9 +36,6 @@
           <a href="/login" class="bg-white text-[#2874f0] font-bold px-7 py-1.5 rounded-sm hover:bg-gray-100 transition shadow-sm">
             Login
           </a>
-          <a href="/register?role=delivery" class="text-white hover:text-yellow-300 hidden md:inline-flex items-center gap-1 text-xs">
-            <i class="fa-solid fa-truck-fast"></i> Become Delivery Partner
-          </a>
         <% } else { %>
           
           <!-- Role-Based Badge & Dropdown -->
@@ -105,6 +102,10 @@
                 </a>
                 <a href="/admin/login-activity" class="block px-4 py-2.5 text-sm hover:bg-purple-50 hover:text-purple-700">
                   <i class="fa-solid fa-user-shield mr-2 text-purple-600"></i> Login Activity Audit
+                </a>
+                <div class="border-t border-gray-100 my-1"></div>
+                <a href="/delivery/dashboard" class="block px-4 py-2.5 text-sm hover:bg-emerald-50 hover:text-emerald-700 font-medium">
+                  <i class="fa-solid fa-truck-fast mr-2 text-emerald-600"></i> Delivery Portal (Live Routing)
                 </a>
               <% } %>
 

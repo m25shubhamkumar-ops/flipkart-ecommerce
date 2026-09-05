@@ -100,7 +100,8 @@ exports.postRegister = async (req, res) => {
     const salt = await bcrypt.genSalt(10);
     const passwordHash = await bcrypt.hash(password, salt);
 
-    const userRole = ['customer', 'delivery'].includes(role) ? role : 'customer';
+    // All public signups are strictly customer accounts
+    const userRole = 'customer';
 
     const user = await User.create({
       name: name.trim(),

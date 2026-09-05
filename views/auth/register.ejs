@@ -50,15 +50,6 @@
             <span class="text-[10px] text-gray-500">Required for order tracking and delivery confirmation.</span>
           </div>
 
-          <!-- Role Selector -->
-          <div>
-            <label class="block text-gray-700 font-bold mb-1">Account Role / Access *</label>
-            <select name="role" class="w-full p-2.5 border border-gray-300 rounded bg-white text-xs font-semibold text-gray-700">
-              <option value="customer" <%= formData.role === 'customer' ? 'selected' : '' %>>🛒 Customer (Shop, Cart, Track Orders)</option>
-              <option value="delivery" <%= formData.role === 'delivery' ? 'selected' : '' %>>🚚 Delivery Agent (Logistics & Shipments)</option>
-            </select>
-          </div>
-
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <label class="block text-gray-700 font-bold mb-1">Password *</label>

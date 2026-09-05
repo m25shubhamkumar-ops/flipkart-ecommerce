@@ -16,8 +16,8 @@ const requireRole = (...allowedRoles) => {
   };
 };
 
-const requireCustomer = requireRole('customer');
-const requireDelivery = requireRole('delivery');
+const requireCustomer = requireRole('customer', 'admin');
+const requireDelivery = requireRole('delivery', 'admin');
 const requireAdmin = requireRole('admin');
 
 module.exports = {
