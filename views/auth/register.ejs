@@ -20,10 +20,23 @@
     <!-- Right Registration Form -->
     <div class="md:col-span-7 p-8 flex flex-col justify-between">
       <div>
+        <!-- Auth Tabs -->
+        <div class="flex border-b border-gray-200 mb-5 text-sm font-semibold">
+          <a href="/login<%= typeof redirect !== 'undefined' && redirect ? '?redirect=' + encodeURIComponent(redirect) : '' %>" 
+             class="pb-2.5 px-4 border-b-2 border-transparent text-gray-500 hover:text-gray-800 transition font-medium">
+            Sign In
+          </a>
+          <a href="/register<%= (typeof formData !== 'undefined' && formData.email) ? '?email=' + encodeURIComponent(formData.email) : '' %><%= typeof redirect !== 'undefined' && redirect ? ((typeof formData !== 'undefined' && formData.email ? '&' : '?') + 'redirect=' + encodeURIComponent(redirect)) : '' %>" 
+             class="pb-2.5 px-4 border-b-2 border-[#2874f0] text-[#2874f0] font-bold">
+            Register
+          </a>
+        </div>
+
         <h3 class="text-lg font-bold text-gray-800 mb-4">Create Your Account</h3>
         <%- include('../partials/alerts') %>
 
         <form action="/register" method="POST" class="space-y-4 text-xs">
+          <input type="hidden" name="redirect" value="<%= typeof redirect !== 'undefined' ? redirect : '' %>">
           <div>
             <label class="block text-gray-700 font-bold mb-1">Full Name *</label>
             <input type="text" name="name" value="<%= formData.name || '' %>" required placeholder="Enter your full name" class="w-full p-2.5 border border-gray-300 rounded focus:border-blue-500 focus:outline-none text-xs">

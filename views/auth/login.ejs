@@ -20,6 +20,18 @@
     <!-- Right Login Form -->
     <div class="md:col-span-7 p-8 flex flex-col justify-between">
       <div>
+        <!-- Auth Tabs -->
+        <div class="flex border-b border-gray-200 mb-5 text-sm font-semibold">
+          <a href="/login<%= redirect ? '?redirect=' + encodeURIComponent(redirect) : '' %>" 
+             class="pb-2.5 px-4 border-b-2 border-[#2874f0] text-[#2874f0] font-bold">
+            Sign In
+          </a>
+          <a href="/register<%= redirect ? '?redirect=' + encodeURIComponent(redirect) : '' %>" 
+             class="pb-2.5 px-4 border-b-2 border-transparent text-gray-500 hover:text-gray-800 transition font-medium">
+            Register
+          </a>
+        </div>
+
         <h3 class="text-lg font-bold text-gray-800 mb-4">Sign in to Flipkart</h3>
         <%- include('../partials/alerts') %>
 
@@ -28,7 +40,7 @@
 
           <div>
             <label class="block text-gray-600 font-semibold mb-1">Email Address *</label>
-            <input type="email" id="emailInput" name="email" required placeholder="Enter your email" class="w-full p-2.5 border border-gray-300 rounded focus:border-blue-500 focus:outline-none text-xs">
+            <input type="email" id="emailInput" name="email" value="<%= (typeof email !== 'undefined' && email) ? email : '' %>" required placeholder="Enter your email" class="w-full p-2.5 border border-gray-300 rounded focus:border-blue-500 focus:outline-none text-xs">
           </div>
 
           <div>

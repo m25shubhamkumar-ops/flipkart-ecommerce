@@ -7,6 +7,15 @@
   </div>
 <% } %>
 
+<% if (typeof notice !== 'undefined' && notice) { %>
+  <div class="mb-4 p-4 text-sm text-blue-800 bg-blue-50 border-l-4 border-blue-500 rounded-r shadow-sm flex items-center justify-between">
+    <div class="flex items-center gap-2">
+      <i class="fa-solid fa-circle-info text-blue-500 text-base"></i>
+      <span><%= notice %></span>
+    </div>
+  </div>
+<% } %>
+
 <% if (typeof success !== 'undefined' && success) { %>
   <div class="mb-4 p-4 text-sm text-emerald-700 bg-emerald-50 border-l-4 border-emerald-500 rounded-r shadow-sm flex items-center justify-between">
     <div class="flex items-center gap-2">
@@ -15,3 +24,4 @@
     </div>
   </div>
 <% } %>
+

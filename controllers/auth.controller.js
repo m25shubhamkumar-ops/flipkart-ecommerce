@@ -45,14 +45,20 @@ exports.getRegister = (req, res) => {
   res.render('auth/register', {
     title: 'Register - Flipkart',
     error: null,
-    formData: {}
+    notice: req.query.notice || null,
+    formData: {
+      email: req.query.email || '',
+      name: req.query.name || '',
+      phone: req.query.phone || ''
+    },
+    redirect: req.query.redirect || ''
   });
 };
 
 // Handle Registration
 exports.postRegister = async (req, res) => {
   try {
-    const { name, email, phone, password, confirmPassword, role } = req.body;
+    const { name, email, phone, password, confirmPassword, role, redirect } = req.body;
     const cleanEmail = email ? email.toLowerCase().trim() : '';
     const cleanPhone = phone ? phone.trim() : '';
 
@@ -60,7 +66,9 @@ exports.postRegister = async (req, res) => {
       return res.render('auth/register', {
         title: 'Register - Flipkart',
         error: 'Please fill in all required fields including your 10-digit mobile number.',
-        formData: req.body
+        notice: null,
+        formData: req.body,
+        redirect: redirect || ''
       });
     }
 
@@ -68,7 +76,9 @@ exports.postRegister = async (req, res) => {
       return res.render('auth/register', {
         title: 'Register - Flipkart',
         error: 'Mobile number must be exactly 10 digits.',
-        formData: req.body
+        notice: null,
+        formData: req.body,
+        redirect: redirect || ''
       });
     }
 
@@ -76,7 +86,9 @@ exports.postRegister = async (req, res) => {
       return res.render('auth/register', {
         title: 'Register - Flipkart',
         error: 'Passwords do not match.',
-        formData: req.body
+        notice: null,
+        formData: req.body,
+        redirect: redirect || ''
       });
     }
 
@@ -84,7 +96,9 @@ exports.postRegister = async (req, res) => {
       return res.render('auth/register', {
         title: 'Register - Flipkart',
         error: 'Password must be at least 6 characters long.',
-        formData: req.body
+        notice: null,
+        formData: req.body,
+        redirect: redirect || ''
       });
     }
 
@@ -93,7 +107,9 @@ exports.postRegister = async (req, res) => {
       return res.render('auth/register', {
         title: 'Register - Flipkart',
         error: 'An account with this email already exists.',
-        formData: req.body
+        notice: null,
+        formData: req.body,
+        redirect: redirect || ''
       });
     }
 
@@ -116,26 +132,30 @@ exports.postRegister = async (req, res) => {
     const otp = await createAndSaveOTP(cleanEmail, 'registration', user._id);
     await sendOTPEmail(cleanEmail, otp, 'Account Verification');
 
-    res.redirect(`/verify-otp?email=${encodeURIComponent(cleanEmail)}&role=${userRole}`);
+    const redirectQuery = redirect ? `&redirect=${encodeURIComponent(redirect)}` : '';
+    res.redirect(`/verify-otp?email=${encodeURIComponent(cleanEmail)}&role=${userRole}${redirectQuery}`);
   } catch (error) {
     console.error('Registration error:', error);
     res.render('auth/register', {
       title: 'Register - Flipkart',
       error: error.message || 'An error occurred during registration. Please try again.',
-      formData: req.body
+      notice: null,
+      formData: req.body,
+      redirect: req.body?.redirect || ''
     });
   }
 };
 
 // Render OTP Verification Page (No OTP shown on screen!)
 exports.getVerifyOtp = (req, res) => {
-  const { email, role } = req.query;
+  const { email, role, redirect } = req.query;
   if (!email) return res.redirect('/register');
 
   res.render('auth/verify-otp', {
     title: 'Verify OTP - Flipkart',
     email,
     role: role || 'customer',
+    redirect: redirect || '',
     error: null,
     success: null
   });
@@ -143,7 +163,7 @@ exports.getVerifyOtp = (req, res) => {
 
 // Process OTP Verification
 exports.postVerifyOtp = async (req, res) => {
-  const { email, otp } = req.body;
+  const { email, otp, redirect } = req.body;
   const cleanEmail = email ? email.toLowerCase().trim() : '';
 
   try {
@@ -153,6 +173,7 @@ exports.postVerifyOtp = async (req, res) => {
         title: 'Verify OTP - Flipkart',
         email: cleanEmail,
         role: req.body.role || 'customer',
+        redirect: redirect || '',
         error: result.message,
         success: null
       });
@@ -188,6 +209,9 @@ exports.postVerifyOtp = async (req, res) => {
 
     if (user.role === 'admin') return res.redirect('/admin/dashboard');
     if (user.role === 'delivery') return res.redirect('/delivery/dashboard');
+    if (redirect && redirect.startsWith('/') && !redirect.startsWith('//')) {
+      return res.redirect(redirect);
+    }
     res.redirect('/');
 
   } catch (error) {
@@ -196,6 +220,7 @@ exports.postVerifyOtp = async (req, res) => {
       title: 'Verify OTP - Flipkart',
       email: cleanEmail,
       role: 'customer',
+      redirect: redirect || '',
       error: 'Verification failed. Please try again.',
       success: null
     });
@@ -228,6 +253,7 @@ exports.getLogin = (req, res) => {
   res.render('auth/login', {
     title: 'Login - Flipkart',
     error: null,
+    email: req.query.email || '',
     success: req.query.registered ? 'Registration successful! Please log in.' : null,
     redirect: req.query.redirect || ''
   });
@@ -239,20 +265,26 @@ exports.postLogin = async (req, res) => {
   const cleanEmail = email ? email.toLowerCase().trim() : '';
 
   try {
+    if (!cleanEmail) {
+      return res.render('auth/login', {
+        title: 'Login - Flipkart',
+        error: 'Please enter your email address.',
+        email: '',
+        success: null,
+        redirect: redirect || ''
+      });
+    }
+
     const user = await User.findOne({ email: cleanEmail });
 
     if (!user) {
       await recordLoginAttempt(req, {
         email: cleanEmail,
         status: 'failed',
-        failureReason: 'User not found'
+        failureReason: 'User not found - redirected to register'
       });
-      return res.render('auth/login', {
-        title: 'Login - Flipkart',
-        error: 'Invalid email or password.',
-        success: null,
-        redirect
-      });
+      const redirectParam = redirect ? `&redirect=${encodeURIComponent(redirect)}` : '';
+      return res.redirect(`/register?email=${encodeURIComponent(cleanEmail)}&notice=${encodeURIComponent("Looks like you don't have an account yet! Please register below to continue.")}${redirectParam}`);
     }
 
     if (!user.isActive) {
@@ -265,8 +297,9 @@ exports.postLogin = async (req, res) => {
       return res.render('auth/login', {
         title: 'Login - Flipkart',
         error: 'This account has been deactivated. Please contact support.',
+        email: cleanEmail,
         success: null,
-        redirect
+        redirect: redirect || ''
       });
     }
 
@@ -281,8 +314,9 @@ exports.postLogin = async (req, res) => {
       return res.render('auth/login', {
         title: 'Login - Flipkart',
         error: 'Invalid email or password.',
+        email: cleanEmail,
         success: null,
-        redirect
+        redirect: redirect || ''
       });
     }
 
@@ -303,7 +337,7 @@ exports.postLogin = async (req, res) => {
 
     await mergeGuestCart(req, res, user._id);
 
-    if (redirect && redirect.startsWith('/')) {
+    if (redirect && redirect.startsWith('/') && !redirect.startsWith('//')) {
       return res.redirect(redirect);
     }
 
@@ -319,8 +353,9 @@ exports.postLogin = async (req, res) => {
     res.render('auth/login', {
       title: 'Login - Flipkart',
       error: 'An unexpected error occurred during login. Please try again.',
+      email: cleanEmail,
       success: null,
-      redirect
+      redirect: redirect || ''
     });
   }
 };
