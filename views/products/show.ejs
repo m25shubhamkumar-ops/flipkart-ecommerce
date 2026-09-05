@@ -44,15 +44,28 @@
 
         <!-- Buttons: Add to Cart and Buy Now -->
         <div class="w-full flex gap-3 mt-auto">
-          <button 
-            type="button" 
-            id="addToCartBtn"
-            onclick="handleAddToCart('<%= product._id %>', this)"
-            <%= product.stock <= 0 ? 'disabled' : '' %> 
-            class="flex-1 bg-[#ff9f00] hover:bg-[#f39700] text-white font-bold py-3 px-4 rounded-sm text-sm uppercase tracking-wider shadow flex items-center justify-center gap-2 disabled:opacity-50 transition-colors"
-          >
-            <i class="fa-solid fa-cart-shopping"></i> Add to Cart
-          </button>
+          <% if (typeof inCart !== 'undefined' && inCart) { %>
+            <button 
+              type="button" 
+              id="addToCartBtn"
+              data-in-cart="true"
+              onclick="window.location.href='/cart'"
+              class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 px-4 rounded-sm text-sm uppercase tracking-wider shadow flex items-center justify-center gap-2 transition-colors"
+            >
+              <i class="fa-solid fa-check"></i> Go to Cart
+            </button>
+          <% } else { %>
+            <button 
+              type="button" 
+              id="addToCartBtn"
+              data-in-cart="false"
+              onclick="handleAddToCart('<%= product._id %>', this)"
+              <%= product.stock <= 0 ? 'disabled' : '' %> 
+              class="flex-1 bg-[#ff9f00] hover:bg-[#f39700] text-white font-bold py-3 px-4 rounded-sm text-sm uppercase tracking-wider shadow flex items-center justify-center gap-2 disabled:opacity-50 transition-colors"
+            >
+              <i class="fa-solid fa-cart-shopping"></i> Add to Cart
+            </button>
+          <% } %>
 
           <form action="/cart/add" method="POST" class="flex-1">
             <input type="hidden" name="productId" value="<%= product._id %>">
@@ -242,6 +255,8 @@
 </main>
 
 <script>
+  window.__CURRENT_PRODUCT_ID__ = '<%= product._id %>';
+
   async function handleAddToCart(productId, btn) {
     if (btn.dataset.inCart === 'true') {
       window.location.href = '/cart';
@@ -269,13 +284,12 @@
         btn.dataset.inCart = 'true';
         btn.className = 'flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 px-4 rounded-sm text-sm uppercase tracking-wider shadow flex items-center justify-center gap-2 transition-colors';
         btn.innerHTML = '<i class="fa-solid fa-check"></i> Go to Cart';
+        btn.onclick = function() { window.location.href = '/cart'; };
 
-        // Update header cart badge
-        const badges = document.querySelectorAll('header a[href="/cart"] span');
-        badges.forEach(b => {
-          b.innerText = data.count;
-          b.style.display = 'flex';
-        });
+        // Update header cart badge via global sync
+        if (window.updateFlipkartCartCount) {
+          window.updateFlipkartCartCount(data.count);
+        }
 
         // Show toast
         const toast = document.getElementById('cartToast');

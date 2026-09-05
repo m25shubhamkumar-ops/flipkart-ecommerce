@@ -3,6 +3,7 @@ const Category = require('../models/category.model');
 const Review = require('../models/review.model');
 const Order = require('../models/order.model');
 const Wishlist = require('../models/wishlist.model');
+const Cart = require('../models/cart.model');
 const { formatPrice } = require('../utils/helpers');
 
 // Home Page
@@ -157,6 +158,28 @@ exports.getProductDetail = async (req, res, next) => {
       inWishlist = !!wishlist;
     }
 
+    // Check if product is already in user's cart or guest cart
+    let inCart = false;
+    if (req.user) {
+      const userCart = await Cart.findOne({
+        userId: req.user._id,
+        'items.productId': product._id
+      });
+      inCart = !!userCart;
+    } else {
+      try {
+        const raw = req.cookies?.guest_cart;
+        if (raw) {
+          const guestItems = typeof raw === 'string' ? JSON.parse(raw) : raw;
+          if (Array.isArray(guestItems)) {
+            inCart = guestItems.some(i => i.productId && i.productId.toString() === product._id.toString());
+          }
+        }
+      } catch (e) {
+        inCart = false;
+      }
+    }
+
     // Similar products in same category
     const similarProducts = await Product.find({
       categoryId: product.categoryId?._id,
@@ -170,6 +193,7 @@ exports.getProductDetail = async (req, res, next) => {
       reviews,
       canReview,
       inWishlist,
+      inCart,
       similarProducts,
       formatPrice
     });

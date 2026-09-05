@@ -40,6 +40,16 @@ app.use(express.json());
 app.use(cookieParser());
 app.use(methodOverride('_method'));
 
+// Disable stale browser caching for SSR HTML pages (preserves real-time cart state on back/forward navigation)
+app.use((req, res, next) => {
+  if (req.method === 'GET' && !req.path.startsWith('/public') && !req.path.includes('.')) {
+    res.set('Cache-Control', 'no-cache, private, no-store, must-revalidate, max-stale=0, post-check=0, pre-check=0');
+    res.set('Pragma', 'no-cache');
+    res.set('Expires', '0');
+  }
+  next();
+});
+
 // Global user attachment & cart counter middleware
 app.use(attachUserOptional);
 app.use(async (req, res, next) => {

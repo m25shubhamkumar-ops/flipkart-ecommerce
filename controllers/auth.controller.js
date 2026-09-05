@@ -32,7 +32,7 @@ const mergeGuestCart = async (req, res, userId) => {
     }
 
     await cart.save();
-    res.clearCookie('guest_cart');
+    res.clearCookie('guest_cart', { path: '/' });
   } catch (err) {
     console.error('Error merging guest cart:', err);
   }

@@ -170,6 +170,20 @@
   </div>
 </main>
 
+<script>
+  (function() {
+    <% const totalQuantity = items && items.length > 0 ? items.reduce((s, i) => s + (i.quantity || 1), 0) : 0; %>
+    const currentCartQty = <%= totalQuantity %>;
+    if (window.updateFlipkartCartCount) {
+      window.updateFlipkartCartCount(currentCartQty);
+    } else {
+      try {
+        localStorage.setItem('flipkart_cart_count', currentCartQty);
+      } catch (e) {}
+    }
+  })();
+</script>
+
 <%- include('../partials/footer') %>
 </body>
 </html>

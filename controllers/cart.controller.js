@@ -157,7 +157,8 @@ exports.postAddToCart = async (req, res, next) => {
       res.cookie('guest_cart', JSON.stringify(guestItems), {
         maxAge: 30 * 24 * 60 * 60 * 1000,
         httpOnly: true,
-        sameSite: 'lax'
+        sameSite: 'lax',
+        path: '/'
       });
       totalCartCount = guestItems.reduce((sum, i) => sum + i.quantity, 0);
     }
@@ -230,7 +231,8 @@ exports.postUpdateQuantity = async (req, res, next) => {
         res.cookie('guest_cart', JSON.stringify(guestItems), {
           maxAge: 30 * 24 * 60 * 60 * 1000,
           httpOnly: true,
-          sameSite: 'lax'
+          sameSite: 'lax',
+          path: '/'
         });
       }
     }
@@ -257,13 +259,43 @@ exports.postRemoveFromCart = async (req, res, next) => {
       res.cookie('guest_cart', JSON.stringify(guestItems), {
         maxAge: 30 * 24 * 60 * 60 * 1000,
         httpOnly: true,
-        sameSite: 'lax'
+        sameSite: 'lax',
+        path: '/'
       });
     }
 
     res.redirect('/cart');
   } catch (error) {
     next(error);
+  }
+};
+
+// Live Cart Count & Product IDs (for instant reactive sync on back navigation)
+exports.getCartCount = async (req, res, next) => {
+  try {
+    let count = 0;
+    let productIds = [];
+
+    if (req.user) {
+      const cart = await Cart.findOne({ userId: req.user._id });
+      if (cart && cart.items) {
+        count = cart.items.reduce((sum, item) => sum + item.quantity, 0);
+        productIds = cart.items.map(item => item.productId.toString());
+      }
+    } else {
+      const guestItems = getGuestCartItems(req);
+      count = guestItems.reduce((sum, item) => sum + (item.quantity || 1), 0);
+      productIds = guestItems.map(item => item.productId.toString());
+    }
+
+    res.set('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0');
+    return res.json({
+      success: true,
+      count,
+      productIds
+    });
+  } catch (error) {
+    return res.json({ success: false, count: 0, productIds: [] });
   }
 };
 

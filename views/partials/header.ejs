@@ -117,14 +117,13 @@
         <% } %>
 
         <!-- Cart (Available for Customer & Guests) -->
-        <a href="/cart" class="flex items-center gap-1.5 hover:text-yellow-200">
+        <a href="/cart" class="flex items-center gap-1.5 hover:text-yellow-200 group relative">
           <div class="relative">
             <i class="fa-solid fa-cart-shopping text-lg"></i>
-            <% if (typeof cartCount !== 'undefined' && cartCount > 0) { %>
-              <span class="absolute -top-2 -right-2 bg-[#ff6161] text-white text-[10px] font-black rounded-full h-4 min-w-4 px-1 flex items-center justify-center shadow">
-                <%= cartCount %>
-              </span>
-            <% } %>
+            <span id="headerCartBadge" 
+                  class="absolute -top-2 -right-2 bg-[#ff6161] text-white text-[10px] font-black rounded-full h-4 min-w-4 px-1 items-center justify-center shadow <%= (typeof cartCount !== 'undefined' && cartCount > 0) ? 'flex' : 'hidden' %>">
+              <%= (typeof cartCount !== 'undefined' && cartCount > 0) ? cartCount : 0 %>
+            </span>
           </div>
           <span class="font-bold hidden sm:inline">Cart</span>
         </a>
@@ -150,3 +149,94 @@
     </form>
   </div>
 </header>
+
+<script>
+  (function() {
+    function updateCartUI(count) {
+      const num = parseInt(count, 10) || 0;
+      const badge = document.getElementById('headerCartBadge');
+      if (badge) {
+        badge.textContent = num;
+        if (num > 0) {
+          badge.classList.remove('hidden');
+          badge.classList.add('flex');
+        } else {
+          badge.classList.remove('flex');
+          badge.classList.add('hidden');
+        }
+      }
+      try {
+        localStorage.setItem('flipkart_cart_count', num);
+      } catch (e) {}
+    }
+
+    // 1. Instant optimistic restore from localStorage (0ms latency on Back/Forward navigation)
+    try {
+      const cached = localStorage.getItem('flipkart_cart_count');
+      if (cached !== null) {
+        updateCartUI(cached);
+      }
+    } catch (e) {}
+
+    // 2. Fetch live count from server
+    async function syncCartCount() {
+      try {
+        const res = await fetch('/cart/count', {
+          headers: { 'Accept': 'application/json' },
+          cache: 'no-store'
+        });
+        if (res.ok) {
+          const data = await res.json();
+          if (data && typeof data.count === 'number') {
+            updateCartUI(data.count);
+
+            // If we are on a product page, also sync the Add to Cart / Go to Cart button!
+            if (Array.isArray(data.productIds) && window.__CURRENT_PRODUCT_ID__) {
+              const inCart = data.productIds.includes(window.__CURRENT_PRODUCT_ID__);
+              const btn = document.getElementById('addToCartBtn');
+              if (btn) {
+                if (inCart) {
+                  btn.dataset.inCart = 'true';
+                  btn.className = 'flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 px-4 rounded-sm text-sm uppercase tracking-wider shadow flex items-center justify-center gap-2 transition-colors';
+                  btn.innerHTML = '<i class="fa-solid fa-check"></i> Go to Cart';
+                } else {
+                  btn.dataset.inCart = 'false';
+                  btn.className = 'flex-1 bg-[#ff9f00] hover:bg-[#f39700] text-white font-bold py-3 px-4 rounded-sm text-sm uppercase tracking-wider shadow flex items-center justify-center gap-2 disabled:opacity-50 transition-colors';
+                  btn.innerHTML = '<i class="fa-solid fa-cart-shopping"></i> Add to Cart';
+                }
+              }
+            }
+          }
+        }
+      } catch (e) {
+        // Silent fallback
+      }
+    }
+
+    // Sync on initial load
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', syncCartCount);
+    } else {
+      syncCartCount();
+    }
+
+    // Crucial: window.pageshow fires on Back/Forward navigation even when retrieved from BFCache!
+    window.addEventListener('pageshow', function() {
+      try {
+        const cached = localStorage.getItem('flipkart_cart_count');
+        if (cached !== null) {
+          updateCartUI(cached);
+        }
+      } catch (e) {}
+      syncCartCount();
+    });
+
+    // Also sync on window focus / tab switch
+    window.addEventListener('focus', syncCartCount);
+
+    // Global helper so product show or cart can update cart count immediately
+    window.updateFlipkartCartCount = function(count) {
+      updateCartUI(count);
+    };
+  })();
+</script>
