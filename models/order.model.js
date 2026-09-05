@@ -43,7 +43,21 @@ const orderSchema = new mongoose.Schema(
     },
     orderStatus: {
       type: String,
-      enum: ['Placed', 'Confirmed', 'Packed', 'Shipped', 'Out for Delivery', 'Delivered', 'Cancelled', 'Undelivered'],
+      enum: [
+        'Placed',
+        'Confirmed',
+        'Packed',
+        'Shipped',
+        'Out for Delivery',
+        'Delivered',
+        'Cancelled',
+        'Return Requested',
+        'Return Approved',
+        'Return Picked Up',
+        'Returned & Refunded',
+        'Return Rejected',
+        'Undelivered'
+      ],
       default: 'Placed',
       index: true
     },
@@ -54,6 +68,45 @@ const orderSchema = new mongoose.Schema(
       index: true
     },
     deliveryNotes: { type: String, default: '' },
+    cancellationDetails: {
+      reason: { type: String, default: '' },
+      comments: { type: String, default: '' },
+      cancelledAt: { type: Date },
+      cancelledBy: { type: String, default: 'Customer' }
+    },
+    returnDetails: {
+      reason: { type: String, default: '' },
+      comments: { type: String, default: '' },
+      resolution: { type: String, enum: ['refund', 'replacement'], default: 'refund' },
+      requestedAt: { type: Date },
+      status: {
+        type: String,
+        enum: ['none', 'requested', 'approved', 'picked_up', 'refunded', 'rejected'],
+        default: 'none'
+      },
+      adminRemarks: { type: String, default: '' },
+      reverseDeliveryAgentId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+        default: null
+      }
+    },
+    refundDetails: {
+      amount: { type: Number, default: 0 },
+      refundStatus: {
+        type: String,
+        enum: ['none', 'initiated', 'processing', 'completed', 'failed'],
+        default: 'none'
+      },
+      refundMethod: { type: String, default: '' },
+      payoutDetails: {
+        upiId: { type: String, default: '' },
+        bankAccount: { type: String, default: '' },
+        ifsc: { type: String, default: '' }
+      },
+      transactionId: { type: String, default: '' },
+      processedAt: { type: Date }
+    },
     statusTimeline: [
       {
         status: { type: String, required: true },
@@ -63,6 +116,7 @@ const orderSchema = new mongoose.Schema(
       }
     ]
   },
+
   { timestamps: true }
 );
 

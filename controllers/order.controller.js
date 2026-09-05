@@ -225,12 +225,24 @@ exports.getOrderDetail = async (req, res, next) => {
     const steps = ['Placed', 'Confirmed', 'Packed', 'Shipped', 'Out for Delivery', 'Delivered'];
     const currentStepIndex = steps.indexOf(order.orderStatus);
 
+    // Check 7-day return window eligibility
+    let isReturnEligible = false;
+    if (order.orderStatus === 'Delivered') {
+      const deliveredEvent = order.statusTimeline?.find(e => e.status === 'Delivered');
+      const deliveryDate = deliveredEvent ? new Date(deliveredEvent.timestamp) : new Date(order.updatedAt);
+      const diffDays = (new Date() - deliveryDate) / (1000 * 60 * 60 * 24);
+      isReturnEligible = diffDays <= 7;
+    }
+
     res.render('orders/show', {
       title: `Order #${order.orderNumber} Details - Flipkart`,
       order,
       steps,
       currentStepIndex,
+      isReturnEligible,
       isNewlyPlaced: req.query.placed === 'true',
+      success: req.query.success || null,
+      error: req.query.error || null,
       formatPrice,
       formatDate
     });
@@ -243,16 +255,18 @@ exports.getOrderDetail = async (req, res, next) => {
 exports.postCancelOrder = async (req, res, next) => {
   try {
     const { id } = req.params;
+    const { reason, comments } = req.body;
     const order = await Order.findOne({ _id: id, userId: req.user._id });
 
     if (!order) {
       return res.status(404).redirect('/orders');
     }
 
-    if (!['Placed', 'Confirmed'].includes(order.orderStatus)) {
-      return res.redirect(`/orders/${order._id}?error=cannot_cancel`);
+    if (!['Placed', 'Confirmed', 'Packed'].includes(order.orderStatus)) {
+      return res.redirect(`/orders/${order._id}?error=` + encodeURIComponent('Order cannot be cancelled once it is shipped or delivered.'));
     }
 
+    // Restore product stock in catalog
     for (const item of order.items) {
       if (item.productId) {
         await Product.findByIdAndUpdate(item.productId, { $inc: { stock: item.quantity } });
@@ -260,16 +274,86 @@ exports.postCancelOrder = async (req, res, next) => {
     }
 
     order.orderStatus = 'Cancelled';
+    order.cancellationDetails = {
+      reason: reason || 'Cancelled by customer',
+      comments: comments || '',
+      cancelledAt: new Date(),
+      cancelledBy: 'Customer'
+    };
+
+    // If payment was completed, process refund
+    if (order.paymentStatus === 'completed') {
+      order.paymentStatus = 'refunded';
+      order.refundDetails = {
+        amount: order.totals.grandTotal,
+        refundStatus: 'completed',
+        refundMethod: order.paymentMethod,
+        transactionId: 'REF_' + Date.now().toString().slice(-8),
+        processedAt: new Date()
+      };
+    }
+
     order.statusTimeline.push({
       status: 'Cancelled',
-      message: 'Order was cancelled by customer.',
+      message: `Order cancelled by customer. Reason: ${reason || 'Customer request'}.${order.paymentStatus === 'refunded' ? ' Refund processed.' : ''}`,
       timestamp: new Date(),
       updatedBy: req.user._id
     });
 
     await order.save();
-    res.redirect(`/orders/${order._id}`);
+    res.redirect(`/orders/${order._id}?success=` + encodeURIComponent('Order cancelled successfully.'));
   } catch (error) {
     next(error);
   }
 };
+
+// Request Return / Replacement
+exports.postRequestReturn = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const { reason, comments, resolution, upiId, bankAccount, ifsc } = req.body;
+
+    const order = await Order.findOne({ _id: id, userId: req.user._id });
+    if (!order) {
+      return res.status(404).redirect('/orders');
+    }
+
+    if (order.orderStatus !== 'Delivered') {
+      return res.redirect(`/orders/${order._id}?error=` + encodeURIComponent('Only delivered orders are eligible for return.'));
+    }
+
+    order.orderStatus = 'Return Requested';
+    order.returnDetails = {
+      reason: reason || 'Product issue',
+      comments: comments || '',
+      resolution: resolution || 'refund',
+      requestedAt: new Date(),
+      status: 'requested'
+    };
+
+    order.refundDetails = {
+      amount: order.totals.grandTotal,
+      refundStatus: 'initiated',
+      refundMethod: order.paymentMethod === 'COD' ? (upiId ? 'UPI' : 'Bank_Transfer') : order.paymentMethod,
+      payoutDetails: {
+        upiId: upiId || '',
+        bankAccount: bankAccount || '',
+        ifsc: ifsc || ''
+      },
+      processedAt: null
+    };
+
+    order.statusTimeline.push({
+      status: 'Return Requested',
+      message: `Customer requested ${resolution === 'replacement' ? 'replacement' : 'return & refund'}. Reason: ${reason || 'Not satisfied'}.${comments ? ` Notes: ${comments}` : ''}`,
+      timestamp: new Date(),
+      updatedBy: req.user._id
+    });
+
+    await order.save();
+    res.redirect(`/orders/${order._id}?success=` + encodeURIComponent('Return request submitted successfully. Reverse pickup is being arranged.'));
+  } catch (error) {
+    next(error);
+  }
+};
+

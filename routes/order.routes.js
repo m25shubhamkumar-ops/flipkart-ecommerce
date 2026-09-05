@@ -9,5 +9,7 @@ router.post('/checkout', requireAuth, orderController.postCreateOrder);
 router.get('/orders', requireAuth, orderController.getMyOrders);
 router.get('/orders/:id', requireAuth, orderController.getOrderDetail);
 router.post('/orders/:id/cancel', requireAuth, orderController.postCancelOrder);
+router.post('/orders/:id/return', requireAuth, orderController.postRequestReturn);
 
 module.exports = router;
+

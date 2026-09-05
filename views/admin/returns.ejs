@@ -1,0 +1,230 @@
+<%- include('../partials/head') %>
+<%- include('../partials/header') %>
+
+<main class="flex-grow py-6">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-4">
+    
+    <!-- Top Header -->
+    <div class="bg-white p-4 rounded-sm shadow-sm border border-gray-200 flex flex-wrap items-center justify-between gap-4 text-xs">
+      <div>
+        <div class="flex items-center gap-2">
+          <h1 class="text-base font-bold text-gray-900">Returns, Replacements & Refunds Queue (<%= orders.length %>)</h1>
+          <span class="bg-purple-100 text-purple-800 text-[10px] font-bold px-2 py-0.5 rounded">Reverse Logistics</span>
+        </div>
+        <p class="text-gray-500 mt-0.5">Manage customer return tickets, assign reverse pickups, and execute refunds.</p>
+      </div>
+
+      <!-- Filters -->
+      <div class="flex flex-wrap items-center gap-1.5">
+        <a href="/admin/returns?status=all" class="px-2.5 py-1.5 rounded border <%= currentFilter === 'all' ? 'bg-purple-700 text-white font-bold' : 'bg-white hover:bg-gray-50 text-gray-700' %>">
+          All
+        </a>
+        <a href="/admin/returns?status=Return Requested" class="px-2.5 py-1.5 rounded border <%= currentFilter === 'Return Requested' ? 'bg-purple-700 text-white font-bold' : 'bg-white hover:bg-gray-50 text-gray-700' %>">
+          Requested
+        </a>
+        <a href="/admin/returns?status=Return Approved" class="px-2.5 py-1.5 rounded border <%= currentFilter === 'Return Approved' ? 'bg-purple-700 text-white font-bold' : 'bg-white hover:bg-gray-50 text-gray-700' %>">
+          Pickup Scheduled
+        </a>
+        <a href="/admin/returns?status=Return Picked Up" class="px-2.5 py-1.5 rounded border <%= currentFilter === 'Return Picked Up' ? 'bg-purple-700 text-white font-bold' : 'bg-white hover:bg-gray-50 text-gray-700' %>">
+          Picked Up
+        </a>
+        <a href="/admin/returns?status=Returned & Refunded" class="px-2.5 py-1.5 rounded border <%= currentFilter === 'Returned & Refunded' ? 'bg-purple-700 text-white font-bold' : 'bg-white hover:bg-gray-50 text-gray-700' %>">
+          Refunded
+        </a>
+        <a href="/admin/returns?status=Return Rejected" class="px-2.5 py-1.5 rounded border <%= currentFilter === 'Return Rejected' ? 'bg-purple-700 text-white font-bold' : 'bg-white hover:bg-gray-50 text-gray-700' %>">
+          Rejected
+        </a>
+      </div>
+    </div>
+
+    <%- include('../partials/alerts') %>
+
+    <!-- Returns Table -->
+    <% if (!orders || orders.length === 0) { %>
+      <div class="bg-white p-12 text-center rounded-sm border border-gray-200">
+        <i class="fa-solid fa-box-open text-5xl text-gray-300 mb-3 block"></i>
+        <h3 class="text-sm font-bold text-gray-700">No return requests found</h3>
+        <p class="text-xs text-gray-500 mt-1">There are currently no orders in the selected return state.</p>
+      </div>
+    <% } else { %>
+      <div class="bg-white rounded-sm shadow-sm border border-gray-200 overflow-x-auto text-xs">
+        <table class="w-full text-left">
+          <thead class="bg-gray-50 text-gray-500 uppercase text-[10px] border-b">
+            <tr>
+              <th class="p-3">Order Number</th>
+              <th class="p-3">Customer & Location</th>
+              <th class="p-3">Return Reason & Comments</th>
+              <th class="p-3">Resolution Type</th>
+              <th class="p-3">Status</th>
+              <th class="p-3">Reverse Delivery Agent</th>
+              <th class="p-3 text-right">Actions & Refund</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-gray-100">
+            <% orders.forEach(order => { %>
+              <tr class="hover:bg-gray-50">
+                <td class="p-3 font-bold text-gray-900">
+                  <a href="/admin/orders/<%= order._id %>" class="text-purple-700 hover:underline">
+                    #<%= order.orderNumber %>
+                  </a>
+                  <span class="text-[11px] text-gray-400 block font-normal"><%= formatDate(order.returnDetails?.requestedAt || order.updatedAt) %></span>
+                </td>
+
+                <td class="p-3">
+                  <div class="font-semibold text-gray-900"><%= order.addressSnapshot.fullName %></div>
+                  <div class="text-gray-500 text-[11px]"><%= order.addressSnapshot.city %>, <%= order.addressSnapshot.pincode %></div>
+                  <div class="text-gray-400 text-[11px]">Tel: <%= order.addressSnapshot.phone %></div>
+                </td>
+
+                <td class="p-3 max-w-xs">
+                  <div class="font-bold text-gray-800"><%= order.returnDetails?.reason || 'Reason not specified' %></div>
+                  <% if (order.returnDetails?.comments) { %>
+                    <p class="text-gray-600 text-[11px] italic mt-0.5">"<%= order.returnDetails.comments %>"</p>
+                  <% } %>
+                </td>
+
+                <td class="p-3">
+                  <span class="px-2 py-0.5 rounded font-bold uppercase text-[10px] <%= order.returnDetails?.resolution === 'replacement' ? 'bg-blue-100 text-blue-800' : 'bg-emerald-100 text-emerald-800' %>">
+                    <%= order.returnDetails?.resolution || 'Refund' %>
+                  </span>
+                  <div class="text-gray-700 font-bold mt-1"><%= formatPrice(order.totals.grandTotal) %></div>
+                  <% if (order.refundDetails?.payoutDetails?.upiId) { %>
+                    <div class="text-[10px] text-gray-500">UPI: <%= order.refundDetails.payoutDetails.upiId %></div>
+                  <% } else if (order.refundDetails?.payoutDetails?.bankAccount) { %>
+                    <div class="text-[10px] text-gray-500">A/C: <%= order.refundDetails.payoutDetails.bankAccount %> (<%= order.refundDetails.payoutDetails.ifsc %>)</div>
+                  <% } %>
+                </td>
+
+                <td class="p-3">
+                  <% if (order.orderStatus === 'Return Requested') { %>
+                    <span class="bg-amber-100 text-amber-800 font-bold px-2 py-0.5 rounded text-[10px]">Action Required</span>
+                  <% } else if (order.orderStatus === 'Return Approved') { %>
+                    <span class="bg-blue-100 text-blue-800 font-bold px-2 py-0.5 rounded text-[10px]">Pickup Scheduled</span>
+                  <% } else if (order.orderStatus === 'Return Picked Up') { %>
+                    <span class="bg-indigo-100 text-indigo-800 font-bold px-2 py-0.5 rounded text-[10px]">Package Picked Up</span>
+                  <% } else if (order.orderStatus === 'Returned & Refunded') { %>
+                    <span class="bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded text-[10px]">Refunded</span>
+                  <% } else if (order.orderStatus === 'Return Rejected') { %>
+                    <span class="bg-red-100 text-red-800 font-bold px-2 py-0.5 rounded text-[10px]">Rejected</span>
+                  <% } %>
+                </td>
+
+                <td class="p-3">
+                  <% if (order.deliveryAgentId) { %>
+                    <div class="font-semibold text-gray-900">🚚 <%= order.deliveryAgentId.name %></div>
+                    <div class="text-gray-400 text-[11px]"><%= order.deliveryAgentId.phone || 'Available' %></div>
+                  <% } else { %>
+                    <span class="text-gray-400 italic">Unassigned</span>
+                  <% } %>
+                </td>
+
+                <td class="p-3 text-right">
+                  <div class="flex items-center justify-end gap-1.5">
+                    <% if (order.orderStatus === 'Return Requested') { %>
+                      <!-- Approve Button & Modal Trigger -->
+                      <button onclick="openApproveModal('<%= order._id %>', '<%= order.orderNumber %>')" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-2.5 py-1.5 rounded text-[11px] shadow-sm">
+                        <i class="fa-solid fa-check"></i> Approve
+                      </button>
+                      <button onclick="openRejectModal('<%= order._id %>', '<%= order.orderNumber %>')" class="bg-red-600 hover:bg-red-700 text-white font-bold px-2.5 py-1.5 rounded text-[11px] shadow-sm">
+                        <i class="fa-solid fa-xmark"></i> Reject
+                      </button>
+                    <% } else if (['Return Approved', 'Return Picked Up'].includes(order.orderStatus)) { %>
+                      <!-- Complete Refund Trigger -->
+                      <form action="/admin/orders/<%= order._id %>/return-action" method="POST" onsubmit="return confirm('Confirm receipt of package and process full refund of <%= formatPrice(order.totals.grandTotal) %>? This will also replenish inventory stock.');">
+                        <input type="hidden" name="action" value="complete_refund">
+                        <input type="hidden" name="refundAmount" value="<%= order.totals.grandTotal %>">
+                        <button type="submit" class="bg-purple-700 hover:bg-purple-800 text-white font-bold px-3 py-1.5 rounded text-[11px] shadow-sm">
+                          <i class="fa-solid fa-money-bill-wave"></i> Process Refund
+                        </button>
+                      </form>
+                    <% } else if (order.orderStatus === 'Returned & Refunded') { %>
+                      <div class="text-emerald-700 font-bold text-[11px]">
+                        ✓ <%= order.refundDetails?.transactionId || 'Completed' %>
+                      </div>
+                    <% } %>
+                    <a href="/admin/orders/<%= order._id %>" class="bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold px-2 py-1.5 rounded text-[11px]">
+                      View
+                    </a>
+                  </div>
+                </td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
+    <% } %>
+
+  </div>
+</main>
+
+<!-- Approve & Assign Pickup Modal -->
+<div id="approveModal" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+  <div class="bg-white rounded-lg max-w-md w-full p-6 shadow-xl space-y-4 text-xs">
+    <div class="flex items-center justify-between border-b pb-3">
+      <h3 class="font-bold text-sm text-gray-900">Approve Return & Schedule Reverse Pickup</h3>
+      <button onclick="closeApproveModal()" class="text-gray-400 hover:text-gray-600 text-base">&times;</button>
+    </div>
+    <form id="approveForm" method="POST" class="space-y-4">
+      <input type="hidden" name="action" value="approve">
+      <div>
+        <label class="block font-semibold text-gray-700 mb-1">Assign Reverse Pickup Delivery Partner *</label>
+        <select name="deliveryAgentId" required class="w-full p-2.5 border rounded bg-white text-xs font-semibold">
+          <option value="">-- Select Agent --</option>
+          <% deliveryAgents.forEach(agent => { %>
+            <option value="<%= agent._id %>">🚚 <%= agent.name %> (<%= agent.email %>)</option>
+          <% }) %>
+        </select>
+      </div>
+      <div>
+        <label class="block font-semibold text-gray-700 mb-1">Pickup Instructions / Remarks</label>
+        <input type="text" name="notes" placeholder="e.g. Inspect package seal, tags and invoice before receiving" class="w-full p-2.5 border rounded text-xs">
+      </div>
+      <div class="flex justify-end gap-2 pt-2 border-t">
+        <button type="button" onclick="closeApproveModal()" class="px-4 py-2 border rounded font-semibold text-gray-600 hover:bg-gray-50">Cancel</button>
+        <button type="submit" class="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded shadow-sm">Confirm Approval</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Reject Modal -->
+<div id="rejectModal" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+  <div class="bg-white rounded-lg max-w-md w-full p-6 shadow-xl space-y-4 text-xs">
+    <div class="flex items-center justify-between border-b pb-3">
+      <h3 class="font-bold text-sm text-gray-900">Reject Return Request</h3>
+      <button onclick="closeRejectModal()" class="text-gray-400 hover:text-gray-600 text-base">&times;</button>
+    </div>
+    <form id="rejectForm" method="POST" class="space-y-4">
+      <input type="hidden" name="action" value="reject">
+      <div>
+        <label class="block font-semibold text-gray-700 mb-1">Reason for Rejection *</label>
+        <textarea name="notes" required rows="3" placeholder="Explain why the return cannot be accepted according to policy" class="w-full p-2.5 border rounded text-xs"></textarea>
+      </div>
+      <div class="flex justify-end gap-2 pt-2 border-t">
+        <button type="button" onclick="closeRejectModal()" class="px-4 py-2 border rounded font-semibold text-gray-600 hover:bg-gray-50">Cancel</button>
+        <button type="submit" class="px-5 py-2 bg-red-600 hover:bg-red-700 text-white font-bold rounded shadow-sm">Confirm Rejection</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+  function openApproveModal(orderId, orderNum) {
+    document.getElementById('approveForm').action = '/admin/orders/' + orderId + '/return-action';
+    document.getElementById('approveModal').classList.remove('hidden');
+  }
+  function closeApproveModal() {
+    document.getElementById('approveModal').classList.add('hidden');
+  }
+  function openRejectModal(orderId, orderNum) {
+    document.getElementById('rejectForm').action = '/admin/orders/' + orderId + '/return-action';
+    document.getElementById('rejectModal').classList.remove('hidden');
+  }
+  function closeRejectModal() {
+    document.getElementById('rejectModal').classList.add('hidden');
+  }
+</script>
+
+<%- include('../partials/footer') %>
+</body>
+</html>

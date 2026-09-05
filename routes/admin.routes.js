@@ -28,6 +28,11 @@ router.get('/admin/orders', adminController.getOrders);
 router.get('/admin/orders/:id', adminController.getOrderDetail);
 router.post('/admin/orders/:id/status', adminController.postUpdateOrderStatus);
 
+// Returns & Refunds Management
+router.get('/admin/returns', adminController.getReturnRequests);
+router.post('/admin/orders/:id/return-action', adminController.postProcessReturnAction);
+
+
 // Users Directory & Role Management
 router.get('/admin/users', adminController.getUsers);
 router.post('/admin/users/:id/role', adminController.postUpdateUserRole);

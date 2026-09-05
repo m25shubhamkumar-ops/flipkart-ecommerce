@@ -327,6 +327,108 @@ exports.postUpdateOrderStatus = async (req, res, next) => {
   }
 };
 
+// Admin Returns & Refund Management Portal
+exports.getReturnRequests = async (req, res, next) => {
+  try {
+    const { status, search } = req.query;
+    const returnStatuses = ['Return Requested', 'Return Approved', 'Return Picked Up', 'Returned & Refunded', 'Return Rejected'];
+    
+    const filter = {
+      orderStatus: (status && status !== 'all') ? status : { $in: returnStatuses }
+    };
+
+    if (search) {
+      filter.orderNumber = { $regex: search.trim(), $options: 'i' };
+    }
+
+    const orders = await Order.find(filter)
+      .populate('userId', 'name email phone')
+      .populate('deliveryAgentId', 'name email phone')
+      .sort({ updatedAt: -1 })
+      .lean();
+
+    const deliveryAgents = await User.find({ role: 'delivery', isActive: true }).select('name email phone').lean();
+
+    res.render('admin/returns', {
+      title: 'Returns, Exchanges & Refunds Management - Admin',
+      orders,
+      deliveryAgents,
+      currentFilter: status || 'all',
+      query: req.query,
+      success: req.query.success || null,
+      error: req.query.error || null,
+      formatPrice,
+      formatDate
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// Admin Process Return Ticket
+exports.postProcessReturnAction = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const { action, deliveryAgentId, notes, refundAmount } = req.body;
+
+    const order = await Order.findById(id);
+    if (!order) return res.redirect('/admin/returns');
+
+    if (action === 'approve') {
+      order.orderStatus = 'Return Approved';
+      order.returnDetails.status = 'approved';
+      if (deliveryAgentId) {
+        order.deliveryAgentId = deliveryAgentId;
+      }
+      order.returnDetails.adminRemarks = notes || 'Return approved by Admin. Reverse pickup scheduled.';
+      order.statusTimeline.push({
+        status: 'Return Approved',
+        message: `Admin approved return request. Reverse pickup assigned.${notes ? ` Note: ${notes}` : ''}`,
+        timestamp: new Date(),
+        updatedBy: req.user._id
+      });
+    } else if (action === 'reject') {
+      order.orderStatus = 'Return Rejected';
+      order.returnDetails.status = 'rejected';
+      order.returnDetails.adminRemarks = notes || 'Return request rejected based on policy terms.';
+      order.statusTimeline.push({
+        status: 'Return Rejected',
+        message: `Admin rejected return request. Reason: ${notes || 'Policy mismatch / condition failed'}`,
+        timestamp: new Date(),
+        updatedBy: req.user._id
+      });
+    } else if (action === 'complete_refund') {
+      order.orderStatus = 'Returned & Refunded';
+      order.returnDetails.status = 'refunded';
+      order.paymentStatus = 'refunded';
+      order.refundDetails.refundStatus = 'completed';
+      order.refundDetails.amount = refundAmount ? parseFloat(refundAmount) : order.totals.grandTotal;
+      order.refundDetails.transactionId = 'TXN_REF_' + Date.now().toString().slice(-8);
+      order.refundDetails.processedAt = new Date();
+
+      // Restore product stock back to warehouse
+      for (const item of order.items) {
+        if (item.productId) {
+          await Product.findByIdAndUpdate(item.productId, { $inc: { stock: item.quantity } });
+        }
+      }
+
+      order.statusTimeline.push({
+        status: 'Returned & Refunded',
+        message: `Admin verified returned package and processed full refund of ₹${order.refundDetails.amount}. Stock restocked.${notes ? ` Note: ${notes}` : ''}`,
+        timestamp: new Date(),
+        updatedBy: req.user._id
+      });
+    }
+
+    await order.save();
+    res.redirect(`/admin/returns?success=` + encodeURIComponent('Return action processed successfully.'));
+  } catch (error) {
+    next(error);
+  }
+};
+
+
 
 // Admin Users Directory & Role Management
 exports.getUsers = async (req, res, next) => {
