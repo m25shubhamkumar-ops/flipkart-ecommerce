@@ -10,9 +10,7 @@ const errorHandler = (err, req, res, next) => {
   const status = err.status || 500;
   res.status(status).render('errors/500', {
     title: '500 - Server Error | Flipkart',
-    message: process.env.NODE_ENV === 'production' 
-      ? 'An unexpected error occurred. Our engineers have been alerted.'
-      : err.message,
+    message: err.message || 'An unexpected error occurred.',
     stack: process.env.NODE_ENV === 'production' ? null : err.stack
   });
 };
