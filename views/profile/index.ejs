@@ -56,16 +56,32 @@
         <form action="/profile/change-password" method="POST" class="space-y-4">
           <div>
             <label class="block font-semibold text-gray-700 mb-1">Current Password</label>
-            <input type="password" name="currentPassword" required placeholder="Enter current password" class="w-full p-2.5 border rounded text-xs">
+            <div class="relative">
+              <input type="password" id="profCurrentPassword" name="currentPassword" required placeholder="Enter current password" class="w-full p-2.5 pr-10 border rounded text-xs">
+              <button type="button" onclick="togglePasswordVisibility('profCurrentPassword', this)" class="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-500 hover:text-blue-600 focus:outline-none text-sm p-1" title="Show or hide password" aria-label="Show password">
+                <i class="fa-regular fa-eye"></i>
+              </button>
+            </div>
           </div>
           <div>
             <label class="block font-semibold text-gray-700 mb-1">New Password</label>
-            <input type="password" name="newPassword" required placeholder="Min 6 characters" class="w-full p-2.5 border rounded text-xs">
+            <div class="relative">
+              <input type="password" id="profNewPassword" name="newPassword" required placeholder="Min 6 characters" class="w-full p-2.5 pr-10 border rounded text-xs">
+              <button type="button" onclick="togglePasswordVisibility('profNewPassword', this)" class="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-500 hover:text-blue-600 focus:outline-none text-sm p-1" title="Show or hide password" aria-label="Show password">
+                <i class="fa-regular fa-eye"></i>
+              </button>
+            </div>
           </div>
           <div>
             <label class="block font-semibold text-gray-700 mb-1">Confirm New Password</label>
-            <input type="password" name="confirmNewPassword" required placeholder="Repeat new password" class="w-full p-2.5 border rounded text-xs">
+            <div class="relative">
+              <input type="password" id="profConfirmPassword" name="confirmNewPassword" required placeholder="Repeat new password" class="w-full p-2.5 pr-10 border rounded text-xs">
+              <button type="button" onclick="togglePasswordVisibility('profConfirmPassword', this)" class="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-500 hover:text-blue-600 focus:outline-none text-sm p-1" title="Show or hide password" aria-label="Show password">
+                <i class="fa-regular fa-eye"></i>
+              </button>
+            </div>
           </div>
+
           <button type="submit" class="bg-[#fb641b] hover:bg-[#ea550d] text-white font-bold py-2 px-6 rounded text-xs">
             Update Password
           </button>

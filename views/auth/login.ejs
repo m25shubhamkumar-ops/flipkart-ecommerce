@@ -36,8 +36,14 @@
               <label class="text-gray-600 font-semibold">Password *</label>
               <a href="/forgot-password" class="text-blue-600 text-[11px] font-bold hover:underline">Forgot?</a>
             </div>
-            <input type="password" id="passwordInput" name="password" required placeholder="Enter password" class="w-full p-2.5 border border-gray-300 rounded focus:border-blue-500 focus:outline-none text-xs">
+            <div class="relative">
+              <input type="password" id="passwordInput" name="password" required placeholder="Enter password" class="w-full p-2.5 pr-10 border border-gray-300 rounded focus:border-blue-500 focus:outline-none text-xs">
+              <button type="button" onclick="togglePasswordVisibility('passwordInput', this)" class="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-500 hover:text-blue-600 focus:outline-none text-sm p-1" title="Show or hide password" aria-label="Show password">
+                <i class="fa-regular fa-eye"></i>
+              </button>
+            </div>
           </div>
+
 
           <button type="submit" class="w-full bg-[#fb641b] hover:bg-[#ea550d] text-white font-bold py-3 rounded-sm uppercase tracking-wider text-xs shadow transition">
             Login

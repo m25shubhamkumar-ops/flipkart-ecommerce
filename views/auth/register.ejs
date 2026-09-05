@@ -62,13 +62,24 @@
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <label class="block text-gray-700 font-bold mb-1">Password *</label>
-              <input type="password" name="password" required minlength="6" placeholder="Min 6 characters" class="w-full p-2.5 border border-gray-300 rounded focus:border-blue-500 focus:outline-none text-xs">
+              <div class="relative">
+                <input type="password" id="regPassword" name="password" required minlength="6" placeholder="Min 6 characters" class="w-full p-2.5 pr-9 border border-gray-300 rounded focus:border-blue-500 focus:outline-none text-xs">
+                <button type="button" onclick="togglePasswordVisibility('regPassword', this)" class="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-500 hover:text-blue-600 focus:outline-none text-xs p-1" title="Show or hide password" aria-label="Show password">
+                  <i class="fa-regular fa-eye"></i>
+                </button>
+              </div>
             </div>
             <div>
               <label class="block text-gray-700 font-bold mb-1">Confirm Password *</label>
-              <input type="password" name="confirmPassword" required minlength="6" placeholder="Repeat password" class="w-full p-2.5 border border-gray-300 rounded focus:border-blue-500 focus:outline-none text-xs">
+              <div class="relative">
+                <input type="password" id="regConfirmPassword" name="confirmPassword" required minlength="6" placeholder="Repeat password" class="w-full p-2.5 pr-9 border border-gray-300 rounded focus:border-blue-500 focus:outline-none text-xs">
+                <button type="button" onclick="togglePasswordVisibility('regConfirmPassword', this)" class="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-500 hover:text-blue-600 focus:outline-none text-xs p-1" title="Show or hide password" aria-label="Show password">
+                  <i class="fa-regular fa-eye"></i>
+                </button>
+              </div>
             </div>
           </div>
+
 
           <p class="text-[11px] text-gray-500 leading-normal">
             By continuing, you agree to Flipkart's Terms of Use and Privacy Policy.
