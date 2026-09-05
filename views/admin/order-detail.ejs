@@ -18,15 +18,25 @@
       <form action="/admin/orders/<%= order._id %>/status" method="POST" class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
         
         <div>
-          <label class="block font-bold text-gray-700 mb-1">Update Order Status</label>
+          <label class="block font-bold text-gray-700 mb-1">Confirm / Update Order Status</label>
           <select name="orderStatus" class="w-full p-2.5 border rounded bg-white font-bold text-gray-800">
             <option value="Placed" <%= order.orderStatus === 'Placed' ? 'selected' : '' %>>Placed (New Order)</option>
-            <option value="Confirmed" <%= order.orderStatus === 'Confirmed' ? 'selected' : '' %>>Confirmed</option>
+            <option value="Confirmed" <%= order.orderStatus === 'Confirmed' ? 'selected' : '' %>>Confirmed (Accept Order)</option>
             <option value="Packed" <%= order.orderStatus === 'Packed' ? 'selected' : '' %>>Packed at Warehouse</option>
             <option value="Shipped" <%= order.orderStatus === 'Shipped' ? 'selected' : '' %>>Shipped (In-Transit)</option>
             <option value="Out for Delivery" <%= order.orderStatus === 'Out for Delivery' ? 'selected' : '' %>>Out for Delivery</option>
-            <option value="Delivered" <%= order.orderStatus === 'Delivered' ? 'selected' : '' %>>Delivered</option>
+            <option value="Delivered" <%= order.orderStatus === 'Delivered' ? 'selected' : '' %>>Delivered (Order Completed)</option>
             <option value="Cancelled" <%= order.orderStatus === 'Cancelled' ? 'selected' : '' %>>Cancelled</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block font-bold text-gray-700 mb-1">Confirm / Update Payment Status</label>
+          <select name="paymentStatus" class="w-full p-2.5 border rounded bg-white font-bold text-gray-800">
+            <option value="pending" <%= order.paymentStatus === 'pending' ? 'selected' : '' %>>⏳ Pending (Payment Awaited / COD)</option>
+            <option value="completed" <%= order.paymentStatus === 'completed' ? 'selected' : '' %>>✅ Completed / Received</option>
+            <option value="failed" <%= order.paymentStatus === 'failed' ? 'selected' : '' %>>❌ Failed</option>
+            <option value="refunded" <%= order.paymentStatus === 'refunded' ? 'selected' : '' %>>↩️ Refunded</option>
           </select>
         </div>
 
@@ -42,10 +52,11 @@
           </select>
         </div>
 
-        <div class="sm:col-span-2">
+        <div>
           <label class="block font-bold text-gray-700 mb-1">Admin Dispatch / Internal Notes</label>
-          <input type="text" name="notes" placeholder="Notes regarding packaging, carrier tracking, or priority" class="w-full p-2 border rounded text-xs">
+          <input type="text" name="notes" placeholder="e.g. Verified payment via UPI, dispatched from Bengaluru Hub" class="w-full p-2.5 border rounded text-xs">
         </div>
+
 
         <div class="sm:col-span-2 flex justify-end">
           <button type="submit" class="bg-purple-700 hover:bg-purple-800 text-white font-bold py-2.5 px-8 rounded text-xs uppercase tracking-wider shadow">

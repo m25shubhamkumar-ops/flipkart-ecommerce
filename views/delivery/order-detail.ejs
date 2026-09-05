@@ -57,13 +57,50 @@
       </div>
 
       <div class="bg-white p-5 rounded-sm border border-gray-200 text-xs space-y-2">
-        <h3 class="font-bold text-gray-400 uppercase tracking-wider text-[10px]">Delivery Address</h3>
+        <div class="flex items-center justify-between">
+          <h3 class="font-bold text-gray-400 uppercase tracking-wider text-[10px]">Delivery Address & Location</h3>
+          <a 
+            href="https://www.google.com/maps/dir/?api=1&destination=<%= encodeURIComponent(order.addressSnapshot.line1 + ', ' + order.addressSnapshot.city + ', ' + order.addressSnapshot.state + ' ' + order.addressSnapshot.pincode) %>" 
+            target="_blank" 
+            class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-1 px-2.5 rounded text-[10px] inline-flex items-center gap-1 shadow-sm"
+          >
+            <i class="fa-solid fa-diamond-turn-right text-yellow-300"></i> Start GPS Navigation
+          </a>
+        </div>
         <p class="text-gray-700 leading-relaxed">
           <%= order.addressSnapshot.line1 %>, <%= order.addressSnapshot.line2 ? order.addressSnapshot.line2 + ', ' : '' %><br>
           <%= order.addressSnapshot.city %>, <%= order.addressSnapshot.state %> - <strong><%= order.addressSnapshot.pincode %></strong>
         </p>
+        <div class="pt-2">
+          <a 
+            href="https://www.google.com/maps/search/?api=1&query=<%= encodeURIComponent(order.addressSnapshot.line1 + ', ' + order.addressSnapshot.city + ' ' + order.addressSnapshot.pincode) %>" 
+            target="_blank" 
+            class="text-blue-600 font-bold hover:underline inline-flex items-center gap-1 text-[11px]"
+          >
+            <i class="fa-solid fa-map-location-dot"></i> View on Google Maps (Full View) ↗
+          </a>
+        </div>
       </div>
     </div>
+
+    <!-- Interactive Delivery Map Preview -->
+    <div class="bg-white rounded-sm border border-gray-200 overflow-hidden shadow-sm">
+      <div class="bg-gray-50 px-4 py-2.5 border-b border-gray-200 flex items-center justify-between text-xs">
+        <span class="font-bold text-gray-700 flex items-center gap-1.5">
+          <i class="fa-solid fa-map text-emerald-600"></i> Delivery Destination Map
+        </span>
+        <span class="text-[11px] text-gray-500"><%= order.addressSnapshot.city %>, <%= order.addressSnapshot.state %> (<%= order.addressSnapshot.pincode %>)</span>
+      </div>
+      <iframe
+        width="100%"
+        height="260"
+        style="border:0;"
+        loading="lazy"
+        referrerpolicy="no-referrer-when-downgrade"
+        src="https://maps.google.com/maps?q=<%= encodeURIComponent(order.addressSnapshot.line1 + ', ' + order.addressSnapshot.city + ' ' + order.addressSnapshot.pincode) %>&t=&z=14&ie=UTF8&iwloc=&output=embed">
+      </iframe>
+    </div>
+
 
     <!-- Package Contents -->
     <div class="bg-white p-5 rounded-sm border border-gray-200 text-xs">

@@ -75,10 +75,19 @@
 
             <!-- Actions -->
             <div class="pt-1 flex gap-2">
-              <a href="/delivery/orders/<%= order._id %>" class="w-full text-center bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 rounded text-xs shadow transition">
-                Manage & Update Delivery Status
+              <a href="/delivery/orders/<%= order._id %>" class="flex-1 text-center bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 rounded text-xs shadow transition">
+                Manage Delivery Status
+              </a>
+              <a 
+                href="https://www.google.com/maps/dir/?api=1&destination=<%= encodeURIComponent(order.addressSnapshot.line1 + ', ' + order.addressSnapshot.city + ' ' + order.addressSnapshot.pincode) %>" 
+                target="_blank" 
+                class="px-3 bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 rounded text-xs shadow transition inline-flex items-center gap-1.5"
+                title="Start Turn-by-Turn GPS Navigation"
+              >
+                <i class="fa-solid fa-diamond-turn-right text-yellow-300"></i> Map
               </a>
             </div>
+
 
           </div>
         <% }) %>

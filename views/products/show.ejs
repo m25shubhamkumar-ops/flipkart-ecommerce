@@ -44,12 +44,15 @@
 
         <!-- Buttons: Add to Cart and Buy Now -->
         <div class="w-full flex gap-3 mt-auto">
-          <form action="/cart/add" method="POST" class="flex-1">
-            <input type="hidden" name="productId" value="<%= product._id %>">
-            <button type="submit" <%= product.stock <= 0 ? 'disabled' : '' %> class="w-full bg-[#ff9f00] hover:bg-[#f39700] text-white font-bold py-3 px-4 rounded-sm text-sm uppercase tracking-wider shadow flex items-center justify-center gap-2 disabled:opacity-50">
-              <i class="fa-solid fa-cart-shopping"></i> Add to Cart
-            </button>
-          </form>
+          <button 
+            type="button" 
+            id="addToCartBtn"
+            onclick="handleAddToCart('<%= product._id %>', this)"
+            <%= product.stock <= 0 ? 'disabled' : '' %> 
+            class="flex-1 bg-[#ff9f00] hover:bg-[#f39700] text-white font-bold py-3 px-4 rounded-sm text-sm uppercase tracking-wider shadow flex items-center justify-center gap-2 disabled:opacity-50 transition-colors"
+          >
+            <i class="fa-solid fa-cart-shopping"></i> Add to Cart
+          </button>
 
           <form action="/cart/add" method="POST" class="flex-1">
             <input type="hidden" name="productId" value="<%= product._id %>">
@@ -59,6 +62,13 @@
             </button>
           </form>
         </div>
+
+        <!-- Inline Toast Alert Container -->
+        <div id="cartToast" class="hidden w-full mt-2 p-2.5 bg-emerald-50 border border-emerald-300 rounded text-emerald-800 text-xs font-semibold text-center flex items-center justify-center gap-2">
+          <i class="fa-solid fa-circle-check text-emerald-600"></i>
+          <span id="cartToastMsg">Item added to cart! It will stay until you remove it.</span>
+        </div>
+
 
         <!-- Wishlist toggle -->
         <div class="w-full mt-3 text-center">
@@ -228,10 +238,66 @@
       <% } %>
 
     </div>
-
   </div>
 </main>
+
+<script>
+  async function handleAddToCart(productId, btn) {
+    if (btn.dataset.inCart === 'true') {
+      window.location.href = '/cart';
+      return;
+    }
+
+    const origHtml = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Adding...';
+
+    try {
+      const res = await fetch('/cart/add', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify({ productId, quantity: 1, ajax: 'true' })
+      });
+
+      const data = await res.json();
+      if (data.success) {
+        // Change button to "GO TO CART"
+        btn.disabled = false;
+        btn.dataset.inCart = 'true';
+        btn.className = 'flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 px-4 rounded-sm text-sm uppercase tracking-wider shadow flex items-center justify-center gap-2 transition-colors';
+        btn.innerHTML = '<i class="fa-solid fa-check"></i> Go to Cart';
+
+        // Update header cart badge
+        const badges = document.querySelectorAll('header a[href="/cart"] span');
+        badges.forEach(b => {
+          b.innerText = data.count;
+          b.style.display = 'flex';
+        });
+
+        // Show toast
+        const toast = document.getElementById('cartToast');
+        const toastMsg = document.getElementById('cartToastMsg');
+        if (toast && toastMsg) {
+          toastMsg.innerText = data.message || 'Added to cart! Item will stay in your cart.';
+          toast.classList.remove('hidden');
+        }
+      } else {
+        alert(data.message || 'Could not add to cart.');
+        btn.disabled = false;
+        btn.innerHTML = origHtml;
+      }
+    } catch (err) {
+      console.error('Cart add error:', err);
+      // Fallback
+      window.location.href = '/cart';
+    }
+  }
+</script>
 
 <%- include('../partials/footer') %>
 </body>
 </html>
+

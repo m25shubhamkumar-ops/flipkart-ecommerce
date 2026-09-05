@@ -1,9 +1,43 @@
 const bcrypt = require('bcryptjs');
 const User = require('../models/user.model');
+const Cart = require('../models/cart.model');
 const { createAndSaveOTP, verifySubmittedOTP } = require('../services/otp.service');
 const { sendOTPEmail } = require('../services/email.service');
 const { generateToken } = require('../services/token.service');
 const { recordLoginAttempt, recordLogout } = require('../utils/audit.helper');
+
+const mergeGuestCart = async (req, res, userId) => {
+  try {
+    const raw = req.cookies?.guest_cart;
+    if (!raw) return;
+    const guestItems = typeof raw === 'string' ? JSON.parse(raw) : raw;
+    if (!Array.isArray(guestItems) || guestItems.length === 0) return;
+
+    let cart = await Cart.findOne({ userId });
+    if (!cart) {
+      cart = new Cart({ userId, items: [] });
+    }
+
+    for (const gi of guestItems) {
+      const idx = cart.items.findIndex(i => i.productId.toString() === gi.productId.toString());
+      if (idx > -1) {
+        cart.items[idx].quantity += gi.quantity || 1;
+      } else {
+        cart.items.push({
+          productId: gi.productId,
+          quantity: gi.quantity || 1,
+          priceSnapshot: gi.priceSnapshot || 0
+        });
+      }
+    }
+
+    await cart.save();
+    res.clearCookie('guest_cart');
+  } catch (err) {
+    console.error('Error merging guest cart:', err);
+  }
+};
+
 
 // Render Register Page
 exports.getRegister = (req, res) => {
@@ -149,9 +183,12 @@ exports.postVerifyOtp = async (req, res) => {
       authMethod: 'password+otp'
     });
 
+    await mergeGuestCart(req, res, user._id);
+
     if (user.role === 'admin') return res.redirect('/admin/dashboard');
     if (user.role === 'delivery') return res.redirect('/delivery/dashboard');
     res.redirect('/');
+
   } catch (error) {
     console.error('OTP verify error:', error);
     res.render('auth/verify-otp', {
@@ -263,9 +300,12 @@ exports.postLogin = async (req, res) => {
       authMethod: 'password'
     });
 
+    await mergeGuestCart(req, res, user._id);
+
     if (redirect && redirect.startsWith('/')) {
       return res.redirect(redirect);
     }
+
     if (user.role === 'admin') {
       return res.redirect('/admin/dashboard');
     }

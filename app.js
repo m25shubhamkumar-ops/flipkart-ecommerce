@@ -53,10 +53,23 @@ app.use(async (req, res, next) => {
     } catch (e) {
       res.locals.cartCount = 0;
     }
+  } else if (!req.user) {
+    try {
+      const raw = req.cookies?.guest_cart;
+      if (raw) {
+        const guestItems = typeof raw === 'string' ? JSON.parse(raw) : raw;
+        if (Array.isArray(guestItems)) {
+          res.locals.cartCount = guestItems.reduce((sum, item) => sum + (item.quantity || 1), 0);
+        }
+      }
+    } catch (e) {
+      res.locals.cartCount = 0;
+    }
   }
   res.locals.currentPath = req.path;
   next();
 });
+
 
 // Health check route (PDF Page 14)
 app.get('/health', (req, res) => {

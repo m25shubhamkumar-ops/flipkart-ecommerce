@@ -291,7 +291,7 @@ exports.getOrderDetail = async (req, res, next) => {
 exports.postUpdateOrderStatus = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const { orderStatus, deliveryAgentId, notes } = req.body;
+    const { orderStatus, paymentStatus, deliveryAgentId, notes } = req.body;
 
     const order = await Order.findById(id);
     if (!order) return res.redirect('/admin/orders');
@@ -299,6 +299,10 @@ exports.postUpdateOrderStatus = async (req, res, next) => {
     const prevStatus = order.orderStatus;
     if (orderStatus) {
       order.orderStatus = orderStatus;
+    }
+
+    if (paymentStatus) {
+      order.paymentStatus = paymentStatus;
     }
 
     if (deliveryAgentId !== undefined) {
@@ -311,7 +315,7 @@ exports.postUpdateOrderStatus = async (req, res, next) => {
 
     order.statusTimeline.push({
       status: orderStatus || prevStatus,
-      message: `Updated by Admin: Status is ${orderStatus || prevStatus}.${notes ? ` Note: ${notes}` : ''}`,
+      message: `Updated by Admin: Status is ${orderStatus || prevStatus}, Payment is ${paymentStatus || order.paymentStatus}.${notes ? ` Note: ${notes}` : ''}`,
       timestamp: new Date(),
       updatedBy: req.user._id
     });
@@ -322,6 +326,7 @@ exports.postUpdateOrderStatus = async (req, res, next) => {
     next(error);
   }
 };
+
 
 // Admin Users Directory & Role Management
 exports.getUsers = async (req, res, next) => {
