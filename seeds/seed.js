@@ -69,32 +69,32 @@ const seedDB = async () => {
       isActive: true
     });
 
-    console.log('Creating Flipkart categories...');
+    console.log('Creating Flipkart categories with high-res verified images...');
     const categories = await Category.insertMany([
       {
         name: 'Mobiles',
         slug: 'mobiles',
-        image: 'https://rukminim2.flixcart.com/flap/128/128/image/22fdd04723182f4f.png?q=100'
+        image: 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=200&q=80'
       },
       {
         name: 'Electronics',
         slug: 'electronics',
-        image: 'https://rukminim2.flixcart.com/flap/128/128/image/69c6589653afdb9a.png?q=100'
+        image: 'https://images.unsplash.com/photo-1498049794561-7780e7231661?w=200&q=80'
       },
       {
         name: 'Fashion',
         slug: 'fashion',
-        image: 'https://rukminim2.flixcart.com/fk-p-flap/128/128/image/0d75b34f7d7f0db3.png?q=100'
+        image: 'https://images.unsplash.com/photo-1445205170230-053b83016050?w=200&q=80'
       },
       {
         name: 'Home & Kitchen',
         slug: 'home-kitchen',
-        image: 'https://rukminim2.flixcart.com/flap/128/128/image/ab7e2b022a4587dd.jpg?q=100'
+        image: 'https://images.unsplash.com/photo-1556911220-e15b29be8c8f?w=200&q=80'
       },
       {
         name: 'Appliances',
         slug: 'appliances',
-        image: 'https://rukminim2.flixcart.com/flap/128/128/image/0ff199d1bd27eb98.png?q=100'
+        image: 'https://images.unsplash.com/photo-1585659722983-3a675dabf23d?w=200&q=80'
       }
     ]);
 
@@ -213,7 +213,7 @@ const seedDB = async () => {
         description: 'Healthy frying with Rapid Air technology. 7 preset touch screen menus, keep warm function, dishwasher safe parts.',
         price: 11995,
         discountPrice: 7999,
-        images: ['https://images.unsplash.com/photo-1585659722983-3a675dabf23d?w=600&q=80'],
+        images: ['https://images.unsplash.com/photo-1585659722983-3a675dabf23d?w=200&q=80'],
         categoryId: catMap['home-kitchen'],
         brand: 'Philips',
         stock: 40,
@@ -229,7 +229,7 @@ const seedDB = async () => {
         images: ['https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=600&q=80'],
         categoryId: catMap['electronics'],
         brand: 'Noise',
-        stock: 3, // Low stock demo!
+        stock: 3,
         ratingAvg: 4.3,
         ratingCount: 420
       }
@@ -250,14 +250,12 @@ const seedDB = async () => {
     });
 
     console.log('Creating sample orders for customer and assigning to delivery agent...');
-    
-    // Order 1: Active In-Transit order assigned to Ramesh
     const activeOrder = await Order.create({
       userId: customer._id,
       orderNumber: 'OD8392019482',
       items: [
         {
-          productId: products[3]._id, // Sony Headphones
+          productId: products[3]._id,
           name: products[3].name,
           image: products[3].images[0],
           price: products[3].price,
@@ -315,63 +313,10 @@ const seedDB = async () => {
       ]
     });
 
-    // Order 2: Delivered order with completed review
-    const deliveredOrder = await Order.create({
-      userId: customer._id,
-      orderNumber: 'OD1948274021',
-      items: [
-        {
-          productId: products[5]._id, // Nike Air Force 1
-          name: products[5].name,
-          image: products[5].images[0],
-          price: products[5].price,
-          discountPrice: products[5].discountPrice,
-          quantity: 1,
-          subtotal: products[5].discountPrice
-        }
-      ],
-      totals: {
-        subtotal: products[5].price,
-        shipping: 0,
-        discount: products[5].price - products[5].discountPrice,
-        grandTotal: products[5].discountPrice
-      },
-      addressSnapshot: {
-        fullName: address.fullName,
-        phone: address.phone,
-        line1: address.line1,
-        line2: address.line2,
-        city: address.city,
-        state: address.state,
-        pincode: address.pincode,
-        country: address.country
-      },
-      paymentMethod: 'Mock_Card',
-      paymentStatus: 'completed',
-      orderStatus: 'Delivered',
-      deliveryAgentId: deliveryAgent._id,
-      deliveryNotes: 'Delivered to customer directly. Received 5-star rating.',
-      statusTimeline: [
-        {
-          status: 'Placed',
-          message: 'Order received.',
-          timestamp: new Date(Date.now() - 72 * 3600 * 1000),
-          updatedBy: customer._id
-        },
-        {
-          status: 'Delivered',
-          message: 'Package handed to recipient.',
-          timestamp: new Date(Date.now() - 48 * 3600 * 1000),
-          updatedBy: deliveryAgent._id
-        }
-      ]
-    });
-
     console.log('Creating sample verified review...');
     await Review.create({
       userId: customer._id,
       productId: products[5]._id,
-      orderId: deliveredOrder._id,
       rating: 5,
       title: 'Super comfortable sneakers!',
       comment: 'Authentic Nike sneakers delivered in great packaging. Fits true to size and looks classic.',
@@ -408,7 +353,7 @@ const seedDB = async () => {
       },
       {
         userId: null,
-        email: 'intruder@unknown.com',
+        email: 'unknown@visitor.com',
         loginTime: new Date(Date.now() - 4 * 3600 * 1000),
         logoutTime: null,
         status: 'failed',
@@ -422,21 +367,7 @@ const seedDB = async () => {
       }
     ]);
 
-    console.log('\n=============================================================');
-    console.log('🎉 SEEDING COMPLETED SUCCESSFULLY!');
-    console.log('=============================================================');
-    console.log('Demo Credentials for the 3 Roles:');
-    console.log('1. 🛒 Customer:');
-    console.log('   Email:    customer@flipkart.com');
-    console.log('   Password: Customer@12345');
-    console.log('2. 🚚 Delivery Agent:');
-    console.log('   Email:    delivery@flipkart.com');
-    console.log('   Password: Delivery@12345');
-    console.log('3. 👑 Admin:');
-    console.log('   Email:    admin@flipkart.com');
-    console.log('   Password: Admin@12345');
-    console.log('=============================================================\n');
-
+    console.log('🎉 Seeding finished successfully!');
     process.exit(0);
   } catch (error) {
     console.error('Seeding error:', error);

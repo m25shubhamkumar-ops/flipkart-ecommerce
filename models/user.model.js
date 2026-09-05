@@ -11,7 +11,7 @@ const userSchema = new mongoose.Schema(
       default: 'customer',
       index: true
     },
-    phone: { type: String, trim: true, default: '' },
+    phone: { type: String, required: true, trim: true }, // Mandatory 10-digit mobile number
     isVerified: { type: Boolean, default: false },
     isActive: { type: Boolean, default: true }
   },

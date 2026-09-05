@@ -20,11 +20,21 @@ exports.postRegister = async (req, res) => {
   try {
     const { name, email, phone, password, confirmPassword, role } = req.body;
     const cleanEmail = email ? email.toLowerCase().trim() : '';
+    const cleanPhone = phone ? phone.trim() : '';
 
-    if (!name || !cleanEmail || !password) {
+    // Mobile number is strictly mandatory
+    if (!name || !cleanEmail || !password || !cleanPhone) {
       return res.render('auth/register', {
         title: 'Register - Flipkart',
-        error: 'Please fill in all required fields.',
+        error: 'Please fill in all required fields including your 10-digit mobile number.',
+        formData: req.body
+      });
+    }
+
+    if (!/^\d{10}$/.test(cleanPhone)) {
+      return res.render('auth/register', {
+        title: 'Register - Flipkart',
+        error: 'Mobile number must be exactly 10 digits.',
         formData: req.body
       });
     }
@@ -57,13 +67,12 @@ exports.postRegister = async (req, res) => {
     const salt = await bcrypt.genSalt(10);
     const passwordHash = await bcrypt.hash(password, salt);
 
-    // Default to customer role unless explicitly requested (e.g. delivery signup)
     const userRole = ['customer', 'delivery'].includes(role) ? role : 'customer';
 
     const user = await User.create({
       name: name.trim(),
       email: cleanEmail,
-      phone: phone ? phone.trim() : '',
+      phone: cleanPhone,
       passwordHash,
       role: userRole,
       isVerified: false
@@ -73,12 +82,15 @@ exports.postRegister = async (req, res) => {
     const otp = await createAndSaveOTP(cleanEmail, 'registration', user._id);
     await sendOTPEmail(cleanEmail, otp, 'Account Verification');
 
+    // Store OTP in temporary cookie for instant on-screen verification backup
+    res.cookie('last_otp', otp, { maxAge: 5 * 60 * 1000, httpOnly: false });
+
     res.redirect(`/verify-otp?email=${encodeURIComponent(cleanEmail)}&role=${userRole}`);
   } catch (error) {
     console.error('Registration error:', error);
     res.render('auth/register', {
       title: 'Register - Flipkart',
-      error: 'An error occurred during registration. Please try again.',
+      error: error.message || 'An error occurred during registration. Please try again.',
       formData: req.body
     });
   }
@@ -88,12 +100,16 @@ exports.postRegister = async (req, res) => {
 exports.getVerifyOtp = (req, res) => {
   const { email, role } = req.query;
   if (!email) return res.redirect('/register');
+
+  const demoOtp = req.cookies?.last_otp || null;
+
   res.render('auth/verify-otp', {
     title: 'Verify OTP - Flipkart',
     email,
     role: role || 'customer',
+    demoOtp,
     error: null,
-    success: 'A 6-digit OTP code has been sent to your email (and logged to your server console).'
+    success: null
   });
 };
 
@@ -109,6 +125,7 @@ exports.postVerifyOtp = async (req, res) => {
         title: 'Verify OTP - Flipkart',
         email: cleanEmail,
         role: req.body.role || 'customer',
+        demoOtp: req.cookies?.last_otp || null,
         error: result.message,
         success: null
       });
@@ -123,6 +140,8 @@ exports.postVerifyOtp = async (req, res) => {
     if (!user) {
       return res.redirect('/register');
     }
+
+    res.clearCookie('last_otp');
 
     // Auto-login after successful verification
     const token = generateToken(user);
@@ -149,6 +168,7 @@ exports.postVerifyOtp = async (req, res) => {
       title: 'Verify OTP - Flipkart',
       email: cleanEmail,
       role: 'customer',
+      demoOtp: req.cookies?.last_otp || null,
       error: 'Verification failed. Please try again.',
       success: null
     });
@@ -162,7 +182,8 @@ exports.postResendOtp = async (req, res) => {
   try {
     const otp = await createAndSaveOTP(cleanEmail, purpose || 'registration');
     await sendOTPEmail(cleanEmail, otp, 'OTP Resend');
-    res.json({ success: true, message: 'New OTP has been sent successfully.' });
+    res.cookie('last_otp', otp, { maxAge: 5 * 60 * 1000, httpOnly: false });
+    res.json({ success: true, otp, message: 'New OTP dispatched to your email address.' });
   } catch (err) {
     res.status(500).json({ success: false, message: 'Failed to resend OTP.' });
   }
@@ -237,7 +258,6 @@ exports.postLogin = async (req, res) => {
       });
     }
 
-    // Success: Generate JWT and attach in HTTP-only Cookie
     const token = generateToken(user);
     res.cookie('token', token, {
       httpOnly: true,
@@ -246,7 +266,6 @@ exports.postLogin = async (req, res) => {
       maxAge: 7 * 24 * 60 * 60 * 1000
     });
 
-    // Record login activity in MongoDB
     await recordLoginAttempt(req, {
       email: cleanEmail,
       userId: user._id,
@@ -254,7 +273,6 @@ exports.postLogin = async (req, res) => {
       authMethod: 'password'
     });
 
-    // Direct user to appropriate destination based on role
     if (redirect && redirect.startsWith('/')) {
       return res.redirect(redirect);
     }
@@ -314,6 +332,7 @@ exports.postForgotPassword = async (req, res) => {
 
     const otp = await createAndSaveOTP(cleanEmail, 'password_reset', user._id);
     await sendOTPEmail(cleanEmail, otp, 'Password Reset');
+    res.cookie('last_otp', otp, { maxAge: 5 * 60 * 1000, httpOnly: false });
 
     res.redirect(`/reset-password?email=${encodeURIComponent(cleanEmail)}`);
   } catch (error) {
@@ -332,6 +351,7 @@ exports.getResetPassword = (req, res) => {
   res.render('auth/reset-password', {
     title: 'Reset Password - Flipkart',
     email,
+    demoOtp: req.cookies?.last_otp || null,
     error: null
   });
 };
@@ -345,6 +365,7 @@ exports.postResetPassword = async (req, res) => {
       return res.render('auth/reset-password', {
         title: 'Reset Password - Flipkart',
         email: cleanEmail,
+        demoOtp: req.cookies?.last_otp || null,
         error: 'Passwords do not match.'
       });
     }
@@ -353,6 +374,7 @@ exports.postResetPassword = async (req, res) => {
       return res.render('auth/reset-password', {
         title: 'Reset Password - Flipkart',
         email: cleanEmail,
+        demoOtp: req.cookies?.last_otp || null,
         error: 'Password must be at least 6 characters.'
       });
     }
@@ -362,10 +384,12 @@ exports.postResetPassword = async (req, res) => {
       return res.render('auth/reset-password', {
         title: 'Reset Password - Flipkart',
         email: cleanEmail,
+        demoOtp: req.cookies?.last_otp || null,
         error: result.message
       });
     }
 
+    res.clearCookie('last_otp');
     const salt = await bcrypt.genSalt(10);
     const passwordHash = await bcrypt.hash(password, salt);
 
@@ -382,6 +406,7 @@ exports.postResetPassword = async (req, res) => {
     res.render('auth/reset-password', {
       title: 'Reset Password - Flipkart',
       email: cleanEmail,
+      demoOtp: req.cookies?.last_otp || null,
       error: 'Failed to reset password. Please try again.'
     });
   }

@@ -1,3 +1,4 @@
+const mongoose = require('mongoose');
 const Order = require('../models/order.model');
 const Cart = require('../models/cart.model');
 const Product = require('../models/product.model');
@@ -9,11 +10,10 @@ exports.getCheckout = async (req, res, next) => {
   try {
     const cart = await Cart.findOne({ userId: req.user._id }).populate('items.productId');
 
-    if (!cart || cart.items.length === 0) {
+    if (!cart || !cart.items || cart.items.length === 0) {
       return res.redirect('/cart');
     }
 
-    // Filter valid active items
     const validItems = cart.items.filter(item => item.productId && item.productId.isActive);
     if (validItems.length === 0) {
       return res.redirect('/cart');
@@ -26,7 +26,7 @@ exports.getCheckout = async (req, res, next) => {
       }
     }
 
-    // Calculate server totals
+    // Calculate totals server-side
     let subtotal = 0;
     let totalDiscount = 0;
     validItems.forEach(item => {
@@ -47,6 +47,7 @@ exports.getCheckout = async (req, res, next) => {
       items: validItems,
       addresses,
       totals: { subtotal, discount: totalDiscount, shipping, grandTotal },
+      error: req.query.error || null,
       formatPrice
     });
   } catch (error) {
@@ -57,27 +58,38 @@ exports.getCheckout = async (req, res, next) => {
 // Place Order
 exports.postCreateOrder = async (req, res, next) => {
   try {
-    const { addressId, paymentMethod = 'COD' } = req.body;
+    const { addressId, paymentMethod = 'COD', fullName, phone, line1, line2, city, state, pincode } = req.body;
 
-    if (!addressId) {
-      return res.status(400).render('errors/500', {
-        title: 'Checkout Error',
-        message: 'Please select a delivery address.',
-        stack: null
+    let address = null;
+
+    // 1. Try finding existing selected address
+    if (addressId && mongoose.Types.ObjectId.isValid(addressId)) {
+      address = await Address.findOne({ _id: addressId, userId: req.user._id });
+    }
+
+    // 2. If no address selected or new address was filled in
+    if (!address && fullName && line1 && city && pincode) {
+      const isFirst = (await Address.countDocuments({ userId: req.user._id })) === 0;
+      address = await Address.create({
+        userId: req.user._id,
+        fullName: fullName.trim(),
+        phone: (phone || req.user.phone || '9876543210').trim(),
+        line1: line1.trim(),
+        line2: (line2 || '').trim(),
+        city: city.trim(),
+        state: (state || 'Karnataka').trim(),
+        pincode: pincode.trim(),
+        isDefault: isFirst
       });
     }
 
-    const address = await Address.findOne({ _id: addressId, userId: req.user._id });
+    // 3. If STILL no address, redirect to checkout with clear message (NEVER 500!)
     if (!address) {
-      return res.status(404).render('errors/500', {
-        title: 'Address Not Found',
-        message: 'The selected delivery address could not be found.',
-        stack: null
-      });
+      return res.redirect('/checkout?error=' + encodeURIComponent('Please select or provide a complete delivery address.'));
     }
 
     const cart = await Cart.findOne({ userId: req.user._id }).populate('items.productId');
-    if (!cart || cart.items.length === 0) {
+    if (!cart || !cart.items || cart.items.length === 0) {
       return res.redirect('/cart');
     }
 
@@ -87,13 +99,14 @@ exports.postCreateOrder = async (req, res, next) => {
 
     // Strict stock verification and price recalculation
     for (const item of cart.items) {
-      const product = await Product.findById(item.productId._id);
-      if (!product || product.stock < item.quantity) {
-        return res.status(400).render('errors/500', {
-          title: 'Stock Error',
-          message: `Product "${item.productId.name}" does not have enough stock available.`,
-          stack: null
-        });
+      const prodId = item.productId?._id || item.productId;
+      if (!prodId) continue;
+
+      const product = await Product.findById(prodId);
+      if (!product || !product.isActive) continue;
+
+      if (product.stock < item.quantity) {
+        return res.redirect(`/checkout?error=` + encodeURIComponent(`Product "${product.name}" is out of stock.`));
       }
 
       const orig = product.price;
@@ -106,7 +119,7 @@ exports.postCreateOrder = async (req, res, next) => {
       orderItems.push({
         productId: product._id,
         name: product.name,
-        image: product.images?.[0] || '',
+        image: product.images?.[0] || 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=200',
         price: orig,
         discountPrice: effective,
         quantity: item.quantity,
@@ -115,6 +128,10 @@ exports.postCreateOrder = async (req, res, next) => {
 
       // Atomically decrement stock
       await Product.findByIdAndUpdate(product._id, { $inc: { stock: -item.quantity } });
+    }
+
+    if (orderItems.length === 0) {
+      return res.redirect('/cart?error=' + encodeURIComponent('No valid products in cart to order.'));
     }
 
     const finalItemsPrice = subtotal - totalDiscount;
@@ -135,13 +152,13 @@ exports.postCreateOrder = async (req, res, next) => {
       },
       addressSnapshot: {
         fullName: address.fullName,
-        phone: address.phone,
+        phone: address.phone || req.user.phone,
         line1: address.line1,
-        line2: address.line2,
+        line2: address.line2 || '',
         city: address.city,
         state: address.state,
         pincode: address.pincode,
-        country: address.country
+        country: address.country || 'India'
       },
       paymentMethod,
       paymentStatus: paymentMethod === 'COD' ? 'pending' : 'completed',
@@ -156,12 +173,13 @@ exports.postCreateOrder = async (req, res, next) => {
       ]
     });
 
-    // Clear cart after successful order creation
+    // Empty cart
     await Cart.findOneAndUpdate({ userId: req.user._id }, { items: [] });
 
     res.redirect(`/orders/${order._id}?placed=true`);
   } catch (error) {
-    next(error);
+    console.error('[Create Order Error]:', error);
+    res.redirect('/checkout?error=' + encodeURIComponent(error.message || 'Unable to place order. Please try again.'));
   }
 };
 
@@ -189,7 +207,6 @@ exports.getOrderDetail = async (req, res, next) => {
     const { id } = req.params;
     const query = { _id: id };
     
-    // Customers can only see their own orders, delivery agents and admins can view
     if (req.user.role === 'customer') {
       query.userId = req.user._id;
     }
@@ -205,7 +222,6 @@ exports.getOrderDetail = async (req, res, next) => {
       });
     }
 
-    // Step order tracking progression
     const steps = ['Placed', 'Confirmed', 'Packed', 'Shipped', 'Out for Delivery', 'Delivered'];
     const currentStepIndex = steps.indexOf(order.orderStatus);
 
@@ -223,7 +239,7 @@ exports.getOrderDetail = async (req, res, next) => {
   }
 };
 
-// Cancel Order (only if Placed or Confirmed)
+// Cancel Order
 exports.postCancelOrder = async (req, res, next) => {
   try {
     const { id } = req.params;
@@ -237,7 +253,6 @@ exports.postCancelOrder = async (req, res, next) => {
       return res.redirect(`/orders/${order._id}?error=cannot_cancel`);
     }
 
-    // Restore stock to inventory
     for (const item of order.items) {
       if (item.productId) {
         await Product.findByIdAndUpdate(item.productId, { $inc: { stock: item.quantity } });
@@ -247,7 +262,7 @@ exports.postCancelOrder = async (req, res, next) => {
     order.orderStatus = 'Cancelled';
     order.statusTimeline.push({
       status: 'Cancelled',
-      message: 'Order was cancelled by the customer.',
+      message: 'Order was cancelled by customer.',
       timestamp: new Date(),
       updatedBy: req.user._id
     });
