@@ -69,6 +69,10 @@ exports.postCreateOrder = async (req, res, next) => {
 
     // 2. If no address selected or new address was filled in
     if (!address && fullName && line1 && city && pincode) {
+      const cleanPincode = pincode.trim();
+      if (!/^[1-9][0-9]{5}$/.test(cleanPincode)) {
+        return res.redirect('/checkout?error=' + encodeURIComponent('Please enter a valid 6-digit Indian PIN code (e.g. 560001, 110001).'));
+      }
       const isFirst = (await Address.countDocuments({ userId: req.user._id })) === 0;
       address = await Address.create({
         userId: req.user._id,
@@ -78,7 +82,7 @@ exports.postCreateOrder = async (req, res, next) => {
         line2: (line2 || '').trim(),
         city: city.trim(),
         state: (state || 'Karnataka').trim(),
-        pincode: pincode.trim(),
+        pincode: cleanPincode,
         isDefault: isFirst
       });
     }
@@ -356,4 +360,48 @@ exports.postRequestReturn = async (req, res, next) => {
     next(error);
   }
 };
+
+// Cancel Return Request by Customer
+exports.postCancelReturn = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const { cancelReason } = req.body;
+    const order = await Order.findOne({ _id: id, userId: req.user._id });
+
+    if (!order) {
+      return res.status(404).redirect('/orders');
+    }
+
+    const cancelableStatuses = ['Return Requested', 'Return Confirmed', 'Return Approved', 'Out for Return'];
+    if (!cancelableStatuses.includes(order.orderStatus)) {
+      return res.redirect(`/orders/${order._id}?error=` + encodeURIComponent('Return request cannot be cancelled once the item is already picked up.'));
+    }
+
+    order.orderStatus = 'Return Cancelled';
+    if (!order.returnDetails) {
+      order.returnDetails = {};
+    }
+    order.returnDetails.status = 'cancelled';
+    order.returnDetails.cancelledAt = new Date();
+    order.returnDetails.cancelReason = cancelReason || 'Customer decided to keep the product';
+
+    // Clear any pending refund details
+    if (order.refundDetails && order.refundDetails.refundStatus === 'initiated') {
+      order.refundDetails.refundStatus = 'none';
+    }
+
+    order.statusTimeline.push({
+      status: 'Return Cancelled',
+      message: `Return request cancelled by customer. Product will be kept by recipient.${cancelReason ? ` Reason: ${cancelReason}` : ''}`,
+      timestamp: new Date(),
+      updatedBy: req.user._id
+    });
+
+    await order.save();
+    res.redirect(`/orders/${order._id}?success=` + encodeURIComponent('Return request cancelled. You have chosen to keep your order.'));
+  } catch (error) {
+    next(error);
+  }
+};
+
 

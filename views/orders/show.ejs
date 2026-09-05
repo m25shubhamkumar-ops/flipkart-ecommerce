@@ -114,7 +114,7 @@
           </div>
         </div>
 
-      <% } else if (['Return Requested', 'Return Approved', 'Return Picked Up', 'Returned & Refunded', 'Return Rejected'].includes(order.orderStatus)) { %>
+      <% } else if (['Return Requested', 'Return Confirmed', 'Return Approved', 'Out for Return', 'Return Picked Up', 'Returned & Refunded', 'Return Cancelled', 'Return Rejected'].includes(order.orderStatus)) { %>
         
         <!-- Return & Refund Lifecycle Tracker -->
         <h2 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-4">Return & Refund Tracker</h2>
@@ -127,11 +127,24 @@
               <p class="text-gray-600">Your return request was reviewed and could not be accepted. Please contact customer support for further assistance.</p>
             </div>
           </div>
+        <% } else if (order.orderStatus === 'Return Cancelled') { %>
+          <div class="p-4 bg-gray-50 border border-gray-300 text-gray-800 rounded text-xs flex items-center justify-between mb-6">
+            <div class="flex items-center gap-3">
+              <i class="fa-solid fa-ban text-gray-500 text-xl"></i>
+              <div>
+                <p class="font-bold text-gray-900">Return Request Cancelled</p>
+                <p class="text-gray-600"><%= order.returnDetails?.cancelReason || 'You cancelled this return request. You have decided to keep the product.' %></p>
+              </div>
+            </div>
+            <span class="text-xs font-bold text-gray-500 bg-gray-200 px-2.5 py-1 rounded">Cancelled on <%= formatDate(order.returnDetails?.cancelledAt || order.updatedAt) %></span>
+          </div>
         <% } else { %>
           <!-- Return Stepper -->
           <% 
-            const returnSteps = ['Return Requested', 'Return Approved', 'Return Picked Up', 'Returned & Refunded'];
-            const retIdx = returnSteps.indexOf(order.orderStatus);
+            const returnSteps = ['Return Requested', 'Return Confirmed', 'Out for Return', 'Return Picked Up', 'Returned & Refunded'];
+            let currentReturnStatus = order.orderStatus;
+            if (currentReturnStatus === 'Return Approved') currentReturnStatus = 'Return Confirmed';
+            const retIdx = returnSteps.indexOf(currentReturnStatus);
           %>
           <div class="relative flex items-center justify-between max-w-2xl mx-auto mb-6">
             <div class="absolute left-0 top-1/2 -translate-y-1/2 h-1 bg-gray-200 w-full z-0"></div>
@@ -161,7 +174,14 @@
             <span class="font-bold text-amber-900 flex items-center gap-1.5">
               <i class="fa-solid fa-arrows-rotate text-amber-600"></i> Return Request Details
             </span>
-            <span class="text-gray-500">Requested on <%= formatDate(order.returnDetails?.requestedAt || order.updatedAt) %></span>
+            <div class="flex items-center gap-2">
+              <span class="text-gray-500">Requested on <%= formatDate(order.returnDetails?.requestedAt || order.updatedAt) %></span>
+              <% if (['Return Requested', 'Return Confirmed', 'Return Approved', 'Out for Return'].includes(order.orderStatus)) { %>
+                <button type="button" onclick="openCancelReturnModal()" class="ml-2 text-xs font-bold text-red-600 hover:text-red-800 border border-red-200 hover:bg-red-50 px-2.5 py-1 rounded transition flex items-center gap-1">
+                  <i class="fa-solid fa-ban text-[11px]"></i> Cancel Return
+                </button>
+              <% } %>
+            </div>
           </div>
 
           <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1 text-gray-700">
@@ -508,6 +528,14 @@
     const el = document.getElementById('returnModal');
     if (el) el.classList.add('hidden');
   }
+  function openCancelReturnModal() {
+    const el = document.getElementById('cancelReturnModal');
+    if (el) el.classList.remove('hidden');
+  }
+  function closeCancelReturnModal() {
+    const el = document.getElementById('cancelReturnModal');
+    if (el) el.classList.add('hidden');
+  }
   function toggleCodPayout() {
     const box = document.getElementById('codPayoutBox');
     if (!box) return;
@@ -515,6 +543,45 @@
     box.style.display = isRefund ? 'block' : 'none';
   }
 </script>
+
+<!-- Cancel Return Modal -->
+<div id="cancelReturnModal" class="fixed inset-0 bg-black/50 z-50 hidden flex items-center justify-center p-4">
+  <div class="bg-white rounded-lg max-w-md w-full p-6 shadow-xl space-y-4">
+    <div class="flex items-center justify-between border-b pb-3">
+      <h3 class="text-sm font-bold text-gray-900 flex items-center gap-2">
+        <i class="fa-solid fa-ban text-red-600"></i> Cancel Return Request
+      </h3>
+      <button type="button" onclick="closeCancelReturnModal()" class="text-gray-400 hover:text-gray-600">
+        <i class="fa-solid fa-xmark text-base"></i>
+      </button>
+    </div>
+
+    <form action="/orders/<%= order._id %>/cancel-return" method="POST" class="space-y-4 text-xs">
+      <p class="text-gray-700">
+        Are you sure you want to cancel your return request? The scheduled reverse pickup will be cancelled, and you will keep this product.
+      </p>
+
+      <div>
+        <label class="block font-bold text-gray-700 mb-1">Reason for cancelling return (Optional)</label>
+        <select name="cancelReason" class="w-full border rounded p-2 text-xs">
+          <option value="Decided to keep the product">I decided to keep the product</option>
+          <option value="Issue resolved / working properly now">Issue resolved / working properly now</option>
+          <option value="Ordered replacement separately">Ordered replacement separately</option>
+          <option value="Other">Other</option>
+        </select>
+      </div>
+
+      <div class="flex justify-end gap-2 pt-2 border-t">
+        <button type="button" onclick="closeCancelReturnModal()" class="px-4 py-2 rounded bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold">
+          Keep Return Active
+        </button>
+        <button type="submit" class="px-4 py-2 rounded bg-red-600 hover:bg-red-700 text-white font-bold">
+          Confirm Cancel Return
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
 
 <%- include('../partials/footer') %>
 </body>

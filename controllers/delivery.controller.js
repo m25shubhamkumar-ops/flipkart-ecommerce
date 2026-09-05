@@ -46,9 +46,11 @@ exports.getOrders = async (req, res, next) => {
 
     if (status && status !== 'all') {
       if (status === 'active') {
-        filter.orderStatus = { $in: ['Confirmed', 'Packed', 'Shipped', 'Out for Delivery'] };
+        filter.orderStatus = { $in: ['Confirmed', 'Packed', 'Shipped', 'Out for Delivery', 'Return Confirmed', 'Return Approved', 'Out for Return'] };
       } else if (status === 'delivered') {
         filter.orderStatus = 'Delivered';
+      } else if (status === 'returns') {
+        filter.orderStatus = { $in: ['Return Confirmed', 'Return Approved', 'Out for Return', 'Return Picked Up', 'Return Cancelled'] };
       } else {
         filter.orderStatus = status;
       }
@@ -106,7 +108,16 @@ exports.postUpdateStatus = async (req, res, next) => {
     const { id } = req.params;
     const { status, deliveryNotes } = req.body;
 
-    const allowedStatuses = ['Shipped', 'Out for Delivery', 'Delivered', 'Undelivered'];
+    const allowedStatuses = [
+      'Shipped',
+      'Out for Delivery',
+      'Delivered',
+      'Undelivered',
+      'Return Confirmed',
+      'Out for Return',
+      'Return Picked Up',
+      'Return Cancelled'
+    ];
     if (!allowedStatuses.includes(status)) {
       return res.redirect(`/delivery/orders/${id}?error=invalid_status`);
     }
@@ -123,6 +134,18 @@ exports.postUpdateStatus = async (req, res, next) => {
     order.orderStatus = status;
     if (deliveryNotes) {
       order.deliveryNotes = deliveryNotes.trim();
+    }
+
+    // Sync return details if reverse logistics status
+    if (status === 'Out for Return') {
+      if (!order.returnDetails) order.returnDetails = {};
+      order.returnDetails.status = 'out_for_pickup';
+    } else if (status === 'Return Picked Up') {
+      if (!order.returnDetails) order.returnDetails = {};
+      order.returnDetails.status = 'picked_up';
+    } else if (status === 'Return Cancelled') {
+      if (!order.returnDetails) order.returnDetails = {};
+      order.returnDetails.status = 'cancelled';
     }
 
     // If delivered and payment was COD, automatically mark payment collected

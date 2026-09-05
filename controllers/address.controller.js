@@ -6,7 +6,8 @@ exports.getAddresses = async (req, res, next) => {
     res.render('profile/addresses', {
       title: 'Manage Addresses - Flipkart',
       addresses,
-      error: null
+      error: req.query.error || null,
+      success: req.query.success || null
     });
   } catch (error) {
     next(error);
@@ -16,6 +17,19 @@ exports.getAddresses = async (req, res, next) => {
 exports.postCreateAddress = async (req, res, next) => {
   try {
     const { fullName, phone, line1, line2, city, state, pincode, isDefault } = req.body;
+
+    const cleanPincode = pincode ? pincode.trim() : '';
+    if (!/^[1-9][0-9]{5}$/.test(cleanPincode)) {
+      const target = req.body.redirect || '/profile/addresses';
+      const sep = target.includes('?') ? '&' : '?';
+      return res.redirect(target + sep + 'error=' + encodeURIComponent('Please enter a valid 6-digit Indian PIN code (e.g. 560001, 110001).'));
+    }
+
+    if (!fullName || !phone || !line1 || !city || !state) {
+      const target = req.body.redirect || '/profile/addresses';
+      const sep = target.includes('?') ? '&' : '?';
+      return res.redirect(target + sep + 'error=' + encodeURIComponent('Please fill in all required address fields.'));
+    }
 
     const existingCount = await Address.countDocuments({ userId: req.user._id });
     const shouldBeDefault = Boolean(isDefault) || existingCount === 0;
@@ -32,7 +46,7 @@ exports.postCreateAddress = async (req, res, next) => {
       line2: line2 ? line2.trim() : '',
       city: city.trim(),
       state: state.trim(),
-      pincode: pincode.trim(),
+      pincode: cleanPincode,
       isDefault: shouldBeDefault
     });
 

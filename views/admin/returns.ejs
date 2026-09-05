@@ -22,14 +22,20 @@
         <a href="/admin/returns?status=Return Requested" class="px-2.5 py-1.5 rounded border <%= currentFilter === 'Return Requested' ? 'bg-purple-700 text-white font-bold' : 'bg-white hover:bg-gray-50 text-gray-700' %>">
           Requested
         </a>
-        <a href="/admin/returns?status=Return Approved" class="px-2.5 py-1.5 rounded border <%= currentFilter === 'Return Approved' ? 'bg-purple-700 text-white font-bold' : 'bg-white hover:bg-gray-50 text-gray-700' %>">
-          Pickup Scheduled
+        <a href="/admin/returns?status=Return Confirmed" class="px-2.5 py-1.5 rounded border <%= (currentFilter === 'Return Confirmed' || currentFilter === 'Return Approved') ? 'bg-purple-700 text-white font-bold' : 'bg-white hover:bg-gray-50 text-gray-700' %>">
+          Confirmed
+        </a>
+        <a href="/admin/returns?status=Out for Return" class="px-2.5 py-1.5 rounded border <%= currentFilter === 'Out for Return' ? 'bg-purple-700 text-white font-bold' : 'bg-white hover:bg-gray-50 text-gray-700' %>">
+          Out for Return
         </a>
         <a href="/admin/returns?status=Return Picked Up" class="px-2.5 py-1.5 rounded border <%= currentFilter === 'Return Picked Up' ? 'bg-purple-700 text-white font-bold' : 'bg-white hover:bg-gray-50 text-gray-700' %>">
           Picked Up
         </a>
         <a href="/admin/returns?status=Returned & Refunded" class="px-2.5 py-1.5 rounded border <%= currentFilter === 'Returned & Refunded' ? 'bg-purple-700 text-white font-bold' : 'bg-white hover:bg-gray-50 text-gray-700' %>">
           Refunded
+        </a>
+        <a href="/admin/returns?status=Return Cancelled" class="px-2.5 py-1.5 rounded border <%= currentFilter === 'Return Cancelled' ? 'bg-purple-700 text-white font-bold' : 'bg-white hover:bg-gray-50 text-gray-700' %>">
+          Cancelled
         </a>
         <a href="/admin/returns?status=Return Rejected" class="px-2.5 py-1.5 rounded border <%= currentFilter === 'Return Rejected' ? 'bg-purple-700 text-white font-bold' : 'bg-white hover:bg-gray-50 text-gray-700' %>">
           Rejected
@@ -98,12 +104,16 @@
                 <td class="p-3">
                   <% if (order.orderStatus === 'Return Requested') { %>
                     <span class="bg-amber-100 text-amber-800 font-bold px-2 py-0.5 rounded text-[10px]">Action Required</span>
-                  <% } else if (order.orderStatus === 'Return Approved') { %>
-                    <span class="bg-blue-100 text-blue-800 font-bold px-2 py-0.5 rounded text-[10px]">Pickup Scheduled</span>
+                  <% } else if (order.orderStatus === 'Return Confirmed' || order.orderStatus === 'Return Approved') { %>
+                    <span class="bg-blue-100 text-blue-800 font-bold px-2 py-0.5 rounded text-[10px]">Return Confirmed</span>
+                  <% } else if (order.orderStatus === 'Out for Return') { %>
+                    <span class="bg-purple-100 text-purple-800 font-bold px-2 py-0.5 rounded text-[10px]">Out for Return</span>
                   <% } else if (order.orderStatus === 'Return Picked Up') { %>
-                    <span class="bg-indigo-100 text-indigo-800 font-bold px-2 py-0.5 rounded text-[10px]">Package Picked Up</span>
+                    <span class="bg-indigo-100 text-indigo-800 font-bold px-2 py-0.5 rounded text-[10px]">Item Picked Up</span>
                   <% } else if (order.orderStatus === 'Returned & Refunded') { %>
                     <span class="bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded text-[10px]">Refunded</span>
+                  <% } else if (order.orderStatus === 'Return Cancelled') { %>
+                    <span class="bg-gray-100 text-gray-700 font-bold px-2 py-0.5 rounded text-[10px]">Cancelled</span>
                   <% } else if (order.orderStatus === 'Return Rejected') { %>
                     <span class="bg-red-100 text-red-800 font-bold px-2 py-0.5 rounded text-[10px]">Rejected</span>
                   <% } %>
@@ -121,14 +131,30 @@
                 <td class="p-3 text-right">
                   <div class="flex items-center justify-end gap-1.5">
                     <% if (order.orderStatus === 'Return Requested') { %>
-                      <!-- Approve Button & Modal Trigger -->
+                      <!-- Confirm & Assign Modal Trigger -->
                       <button onclick="openApproveModal('<%= order._id %>', '<%= order.orderNumber %>')" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-2.5 py-1.5 rounded text-[11px] shadow-sm">
-                        <i class="fa-solid fa-check"></i> Approve
+                        <i class="fa-solid fa-check"></i> Confirm Return
                       </button>
                       <button onclick="openRejectModal('<%= order._id %>', '<%= order.orderNumber %>')" class="bg-red-600 hover:bg-red-700 text-white font-bold px-2.5 py-1.5 rounded text-[11px] shadow-sm">
                         <i class="fa-solid fa-xmark"></i> Reject
                       </button>
-                    <% } else if (['Return Approved', 'Return Picked Up'].includes(order.orderStatus)) { %>
+                    <% } else if (order.orderStatus === 'Return Confirmed' || order.orderStatus === 'Return Approved') { %>
+                      <!-- Dispatch for Reverse Pickup -->
+                      <form action="/admin/orders/<%= order._id %>/return-action" method="POST" class="inline">
+                        <input type="hidden" name="action" value="out_for_return">
+                        <button type="submit" class="bg-purple-600 hover:bg-purple-700 text-white font-bold px-2.5 py-1.5 rounded text-[11px] shadow-sm">
+                          <i class="fa-solid fa-truck-pickup"></i> Out for Return
+                        </button>
+                      </form>
+                    <% } else if (order.orderStatus === 'Out for Return') { %>
+                      <!-- Mark Picked Up -->
+                      <form action="/admin/orders/<%= order._id %>/return-action" method="POST" class="inline">
+                        <input type="hidden" name="action" value="picked_up">
+                        <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-2.5 py-1.5 rounded text-[11px] shadow-sm">
+                          <i class="fa-solid fa-box"></i> Mark Picked Up
+                        </button>
+                      </form>
+                    <% } else if (order.orderStatus === 'Return Picked Up') { %>
                       <!-- Complete Refund Trigger -->
                       <form action="/admin/orders/<%= order._id %>/return-action" method="POST" onsubmit="return confirm('Confirm receipt of package and process full refund of <%= formatPrice(order.totals.grandTotal) %>? This will also replenish inventory stock.');">
                         <input type="hidden" name="action" value="complete_refund">

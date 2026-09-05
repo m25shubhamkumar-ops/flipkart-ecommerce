@@ -52,9 +52,12 @@ const orderSchema = new mongoose.Schema(
         'Delivered',
         'Cancelled',
         'Return Requested',
+        'Return Confirmed',
         'Return Approved',
+        'Out for Return',
         'Return Picked Up',
         'Returned & Refunded',
+        'Return Cancelled',
         'Return Rejected',
         'Undelivered'
       ],
@@ -81,7 +84,7 @@ const orderSchema = new mongoose.Schema(
       requestedAt: { type: Date },
       status: {
         type: String,
-        enum: ['none', 'requested', 'approved', 'picked_up', 'refunded', 'rejected'],
+        enum: ['none', 'requested', 'confirmed', 'approved', 'out_for_pickup', 'picked_up', 'refunded', 'cancelled', 'rejected'],
         default: 'none'
       },
       adminRemarks: { type: String, default: '' },

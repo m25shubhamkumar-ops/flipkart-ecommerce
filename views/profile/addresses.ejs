@@ -9,18 +9,20 @@
       <a href="/profile" class="text-blue-600 font-bold hover:underline">Back to Profile</a>
     </div>
 
+    <%- include('../partials/alerts') %>
+
     <!-- Add New Address Form -->
     <div class="bg-white p-6 rounded-sm shadow-sm border border-gray-200 text-xs">
       <h2 class="font-bold text-gray-900 border-b pb-3 mb-4 text-sm">+ Add a New Address</h2>
       
-      <form action="/profile/addresses" method="POST" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <form action="/profile/addresses" method="POST" class="grid grid-cols-1 sm:grid-cols-2 gap-4" data-indian-address>
         <div>
           <label class="block font-semibold mb-1">Full Name *</label>
           <input type="text" name="fullName" required placeholder="Receiver's name" class="w-full p-2 border rounded text-xs">
         </div>
         <div>
           <label class="block font-semibold mb-1">Mobile Number *</label>
-          <input type="tel" name="phone" required placeholder="10-digit number" class="w-full p-2 border rounded text-xs">
+          <input type="tel" name="phone" required pattern="[0-9]{10}" placeholder="10-digit number" class="w-full p-2 border rounded text-xs">
         </div>
         <div class="sm:col-span-2">
           <label class="block font-semibold mb-1">Address (House No., Building, Street) *</label>
@@ -31,18 +33,22 @@
           <input type="text" name="line2" placeholder="Address Line 2 (Optional)" class="w-full p-2 border rounded text-xs">
         </div>
         <div>
-          <label class="block font-semibold mb-1">City / Town *</label>
-          <input type="text" name="city" required placeholder="City" class="w-full p-2 border rounded text-xs">
+          <label class="block font-semibold mb-1">6-Digit Indian Pincode *</label>
+          <input type="text" name="pincode" required pattern="[1-9][0-9]{5}" maxlength="6" placeholder="e.g. 560001" class="w-full p-2 border rounded text-xs pincode-input">
+          <div class="pincode-status text-[11px] mt-1"></div>
         </div>
         <div>
-          <label class="block font-semibold mb-1">State *</label>
-          <input type="text" name="state" required placeholder="State" class="w-full p-2 border rounded text-xs">
+          <label class="block font-semibold mb-1">State / Union Territory *</label>
+          <select name="state" required class="w-full p-2 border rounded text-xs bg-white font-medium state-select">
+            <option value="">-- Select State / UT --</option>
+          </select>
         </div>
         <div>
-          <label class="block font-semibold mb-1">Pincode *</label>
-          <input type="text" name="pincode" required placeholder="6 digits" class="w-full p-2 border rounded text-xs">
+          <label class="block font-semibold mb-1">City / District * <span class="text-[11px] text-gray-500 font-normal">(Pick from list or type manually)</span></label>
+          <input type="text" name="city" required placeholder="Select from list or type city name" class="w-full p-2 border rounded text-xs city-input" autocomplete="off">
+          <div class="quick-cities flex flex-wrap items-center gap-1.5 mt-1.5"></div>
         </div>
-        <div class="sm:col-span-2 flex items-center gap-2">
+        <div class="sm:col-span-2 flex items-center gap-2 pt-2">
           <input type="checkbox" id="isDefault" name="isDefault" class="text-blue-600">
           <label for="isDefault" class="font-semibold text-gray-700 cursor-pointer">Set as default shipping address</label>
         </div>
@@ -88,6 +94,7 @@
   </div>
 </main>
 
+<script src="/js/india-address.js"></script>
 <%- include('../partials/footer') %>
 </body>
 </html>

@@ -20,13 +20,24 @@
         <div>
           <label class="block font-bold text-gray-700 mb-1">Confirm / Update Order Status</label>
           <select name="orderStatus" class="w-full p-2.5 border rounded bg-white font-bold text-gray-800">
-            <option value="Placed" <%= order.orderStatus === 'Placed' ? 'selected' : '' %>>Placed (New Order)</option>
-            <option value="Confirmed" <%= order.orderStatus === 'Confirmed' ? 'selected' : '' %>>Confirmed (Accept Order)</option>
-            <option value="Packed" <%= order.orderStatus === 'Packed' ? 'selected' : '' %>>Packed at Warehouse</option>
-            <option value="Shipped" <%= order.orderStatus === 'Shipped' ? 'selected' : '' %>>Shipped (In-Transit)</option>
-            <option value="Out for Delivery" <%= order.orderStatus === 'Out for Delivery' ? 'selected' : '' %>>Out for Delivery</option>
-            <option value="Delivered" <%= order.orderStatus === 'Delivered' ? 'selected' : '' %>>Delivered (Order Completed)</option>
-            <option value="Cancelled" <%= order.orderStatus === 'Cancelled' ? 'selected' : '' %>>Cancelled</option>
+            <optgroup label="Forward Logistics">
+              <option value="Placed" <%= order.orderStatus === 'Placed' ? 'selected' : '' %>>Placed (New Order)</option>
+              <option value="Confirmed" <%= order.orderStatus === 'Confirmed' ? 'selected' : '' %>>Confirmed (Accept Order)</option>
+              <option value="Packed" <%= order.orderStatus === 'Packed' ? 'selected' : '' %>>Packed at Warehouse</option>
+              <option value="Shipped" <%= order.orderStatus === 'Shipped' ? 'selected' : '' %>>Shipped (In-Transit)</option>
+              <option value="Out for Delivery" <%= order.orderStatus === 'Out for Delivery' ? 'selected' : '' %>>Out for Delivery</option>
+              <option value="Delivered" <%= order.orderStatus === 'Delivered' ? 'selected' : '' %>>Delivered (Order Completed)</option>
+              <option value="Cancelled" <%= order.orderStatus === 'Cancelled' ? 'selected' : '' %>>Cancelled</option>
+            </optgroup>
+            <optgroup label="Reverse Logistics (Returns & Refunds)">
+              <option value="Return Requested" <%= order.orderStatus === 'Return Requested' ? 'selected' : '' %>>Return Requested</option>
+              <option value="Return Confirmed" <%= (order.orderStatus === 'Return Confirmed' || order.orderStatus === 'Return Approved') ? 'selected' : '' %>>Return Confirmed (Approve Pickup)</option>
+              <option value="Out for Return" <%= order.orderStatus === 'Out for Return' ? 'selected' : '' %>>Out for Return (Pickup In-Progress)</option>
+              <option value="Return Picked Up" <%= order.orderStatus === 'Return Picked Up' ? 'selected' : '' %>>Return Picked Up (Collected)</option>
+              <option value="Returned & Refunded" <%= order.orderStatus === 'Returned & Refunded' ? 'selected' : '' %>>Returned & Refunded (Completed)</option>
+              <option value="Return Cancelled" <%= order.orderStatus === 'Return Cancelled' ? 'selected' : '' %>>Return Cancelled</option>
+              <option value="Return Rejected" <%= order.orderStatus === 'Return Rejected' ? 'selected' : '' %>>Return Rejected</option>
+            </optgroup>
           </select>
         </div>
 

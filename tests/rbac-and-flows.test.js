@@ -58,9 +58,9 @@ const runTests = async () => {
     console.log('  ✅ GET /health returns 200 UP\n');
 
     // 2. Fetch seeded users
-    const customer = await User.findOne({ email: 'customer@flipkart.com' });
-    const delivery = await User.findOne({ email: 'delivery@flipkart.com' });
-    const admin = await User.findOne({ email: 'admin@flipkart.com' });
+    const customer = await User.findOne({ role: 'customer' });
+    const delivery = await User.findOne({ role: 'delivery' });
+    const admin = await User.findOne({ role: 'admin' });
 
     assert.ok(customer, 'Customer user should exist');
     assert.ok(delivery, 'Delivery user should exist');
@@ -72,9 +72,9 @@ const runTests = async () => {
 
     // 3. Guest Access Restrictions
     console.log('Test 2: Guest Security Boundaries');
-    const guestCartRes = await request('/cart');
-    assert.strictEqual(guestCartRes.statusCode, 302, 'Guest should be redirected when accessing /cart');
-    assert.ok(guestCartRes.headers.location.includes('/login'), 'Redirect location should be login');
+    const guestCheckoutRes = await request('/checkout');
+    assert.strictEqual(guestCheckoutRes.statusCode, 302, 'Guest should be redirected when accessing /checkout');
+    assert.ok(guestCheckoutRes.headers.location.includes('/login'), 'Redirect location should be login');
 
     const guestAdminRes = await request('/admin/dashboard');
     assert.strictEqual(guestAdminRes.statusCode, 302, 'Guest should be redirected from /admin');

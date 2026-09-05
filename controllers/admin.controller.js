@@ -331,10 +331,30 @@ exports.postUpdateOrderStatus = async (req, res, next) => {
 exports.getReturnRequests = async (req, res, next) => {
   try {
     const { status, search } = req.query;
-    const returnStatuses = ['Return Requested', 'Return Approved', 'Return Picked Up', 'Returned & Refunded', 'Return Rejected'];
+    const returnStatuses = [
+      'Return Requested',
+      'Return Confirmed',
+      'Return Approved',
+      'Out for Return',
+      'Return Picked Up',
+      'Returned & Refunded',
+      'Return Cancelled',
+      'Return Rejected'
+    ];
     
+    let filterStatus;
+    if (status && status !== 'all') {
+      if (status === 'Return Confirmed') {
+        filterStatus = { $in: ['Return Confirmed', 'Return Approved'] };
+      } else {
+        filterStatus = status;
+      }
+    } else {
+      filterStatus = { $in: returnStatuses };
+    }
+
     const filter = {
-      orderStatus: (status && status !== 'all') ? status : { $in: returnStatuses }
+      orderStatus: filterStatus
     };
 
     if (search) {
@@ -374,16 +394,46 @@ exports.postProcessReturnAction = async (req, res, next) => {
     const order = await Order.findById(id);
     if (!order) return res.redirect('/admin/returns');
 
-    if (action === 'approve') {
-      order.orderStatus = 'Return Approved';
-      order.returnDetails.status = 'approved';
+    if (action === 'approve' || action === 'confirm') {
+      order.orderStatus = 'Return Confirmed';
+      order.returnDetails.status = 'confirmed';
       if (deliveryAgentId) {
         order.deliveryAgentId = deliveryAgentId;
       }
-      order.returnDetails.adminRemarks = notes || 'Return approved by Admin. Reverse pickup scheduled.';
+      order.returnDetails.adminRemarks = notes || 'Return confirmed by Admin. Reverse pickup scheduled.';
       order.statusTimeline.push({
-        status: 'Return Approved',
-        message: `Admin approved return request. Reverse pickup assigned.${notes ? ` Note: ${notes}` : ''}`,
+        status: 'Return Confirmed',
+        message: `Admin confirmed return request. Reverse pickup scheduled.${notes ? ` Note: ${notes}` : ''}`,
+        timestamp: new Date(),
+        updatedBy: req.user._id
+      });
+    } else if (action === 'out_for_return') {
+      order.orderStatus = 'Out for Return';
+      order.returnDetails.status = 'out_for_pickup';
+      if (deliveryAgentId) {
+        order.deliveryAgentId = deliveryAgentId;
+      }
+      order.statusTimeline.push({
+        status: 'Out for Return',
+        message: `Delivery agent is out for reverse pickup.${notes ? ` Note: ${notes}` : ''}`,
+        timestamp: new Date(),
+        updatedBy: req.user._id
+      });
+    } else if (action === 'picked_up') {
+      order.orderStatus = 'Return Picked Up';
+      order.returnDetails.status = 'picked_up';
+      order.statusTimeline.push({
+        status: 'Return Picked Up',
+        message: `Return package picked up from customer.${notes ? ` Note: ${notes}` : ''}`,
+        timestamp: new Date(),
+        updatedBy: req.user._id
+      });
+    } else if (action === 'cancel_return') {
+      order.orderStatus = 'Return Cancelled';
+      order.returnDetails.status = 'cancelled';
+      order.statusTimeline.push({
+        status: 'Return Cancelled',
+        message: `Return cancelled by Admin.${notes ? ` Note: ${notes}` : ''}`,
         timestamp: new Date(),
         updatedBy: req.user._id
       });
