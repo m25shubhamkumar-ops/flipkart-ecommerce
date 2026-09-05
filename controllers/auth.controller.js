@@ -173,9 +173,11 @@ exports.postResendOtp = async (req, res) => {
     await sendOTPEmail(cleanEmail, otp, 'OTP Resend');
     res.json({ success: true, message: 'New OTP dispatched to your Gmail inbox.' });
   } catch (err) {
-    res.status(500).json({ success: false, message: 'Failed to resend OTP.' });
+    console.error('postResendOtp error:', err);
+    res.status(500).json({ success: false, message: err.message || 'Failed to resend OTP.' });
   }
 };
+
 
 // Render Login Page
 exports.getLogin = (req, res) => {
