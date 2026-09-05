@@ -1,0 +1,163 @@
+<%- include('partials/head') %>
+<%- include('partials/header') %>
+
+<main class="flex-grow">
+  
+  <!-- Category Navigation Bar -->
+  <div class="bg-white shadow-sm border-b border-gray-200 mb-3">
+    <div class="max-w-7xl mx-auto px-4 py-3">
+      <div class="flex items-center justify-between overflow-x-auto no-scrollbar gap-6 text-center">
+        <% if (categories && categories.length > 0) { %>
+          <% categories.forEach(cat => { %>
+            <a href="/products?category=<%= cat.slug %>" class="group flex flex-col items-center flex-shrink-0 min-w-[72px]">
+              <div class="w-14 h-14 mb-1.5 rounded-full bg-blue-50 group-hover:bg-blue-100 flex items-center justify-center p-1 transition overflow-hidden">
+                <% if (cat.image) { %>
+                  <img src="<%= cat.image %>" alt="<%= cat.name %>" class="w-full h-full object-contain">
+                <% } else { %>
+                  <i class="fa-solid fa-layer-group text-blue-600 text-xl"></i>
+                <% } %>
+              </div>
+              <span class="text-xs font-bold text-gray-700 group-hover:text-blue-600 transition"><%= cat.name %></span>
+            </a>
+          <% }) %>
+        <% } %>
+      </div>
+    </div>
+  </div>
+
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-4">
+    
+    <!-- Hero Banner -->
+    <div class="relative overflow-hidden rounded-md shadow bg-gradient-to-r from-blue-700 via-blue-600 to-indigo-800 text-white p-6 sm:p-10">
+      <div class="max-w-xl space-y-3">
+        <span class="inline-block bg-yellow-400 text-blue-900 font-extrabold text-xs px-3 py-1 rounded-full uppercase tracking-wider">
+          Big Mega Savings 2026
+        </span>
+        <h1 class="text-3xl sm:text-5xl font-black tracking-tight leading-tight">
+          Flipkart Smart Deals
+        </h1>
+        <p class="text-blue-100 text-sm sm:text-base font-normal">
+          Up to 80% off on premium electronics, smartphones, fashion, and home decor. Fast delivery to your doorstep.
+        </p>
+        <div class="pt-2 flex gap-3">
+          <a href="/products" class="bg-yellow-400 text-gray-900 hover:bg-yellow-300 font-bold px-6 py-2.5 rounded text-sm shadow transition">
+            Shop All Deals
+          </a>
+          <a href="/register" class="bg-white/20 hover:bg-white/30 backdrop-blur-sm text-white font-semibold px-5 py-2.5 rounded text-sm transition">
+            Join Flipkart
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Deals of the Day Strip -->
+    <% if (dealProducts && dealProducts.length > 0) { %>
+      <div class="bg-white p-4 sm:p-6 rounded-md shadow-sm">
+        <div class="flex items-center justify-between border-b pb-3 mb-4">
+          <div class="flex items-center gap-2">
+            <h2 class="text-lg sm:text-xl font-bold text-gray-900">Deals of the Day</h2>
+            <span class="bg-red-100 text-red-700 text-xs font-bold px-2 py-0.5 rounded">Special Price</span>
+          </div>
+          <a href="/products" class="text-blue-600 hover:text-blue-800 text-sm font-bold flex items-center gap-1">
+            VIEW ALL <i class="fa-solid fa-chevron-right text-xs"></i>
+          </a>
+        </div>
+
+        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+          <% dealProducts.forEach(product => { %>
+            <a href="/products/<%= product.slug %>" class="group flex flex-col p-2 border border-transparent hover:border-gray-200 hover:shadow-md rounded transition bg-white text-center">
+              <div class="h-36 w-full flex items-center justify-center mb-2 overflow-hidden">
+                <img src="<%= product.images && product.images[0] ? product.images[0] : 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400' %>" 
+                     alt="<%= product.name %>" 
+                     class="max-h-full max-w-full object-contain group-hover:scale-105 transition duration-300">
+              </div>
+              <h3 class="text-xs font-semibold text-gray-800 truncate group-hover:text-blue-600"><%= product.name %></h3>
+              <div class="mt-1">
+                <span class="text-xs font-bold text-emerald-700">From <%= formatPrice(product.discountPrice > 0 ? product.discountPrice : product.price) %></span>
+                <% if (product.discountPrice > 0 && product.discountPrice < product.price) { %>
+                  <div class="text-[11px] text-gray-400 line-through"><%= formatPrice(product.price) %></div>
+                <% } %>
+              </div>
+              <div class="text-[11px] text-gray-500 mt-0.5"><%= product.brand %></div>
+            </a>
+          <% }) %>
+        </div>
+      </div>
+    <% } %>
+
+    <!-- Featured Products Grid -->
+    <div class="bg-white p-4 sm:p-6 rounded-md shadow-sm">
+      <div class="flex items-center justify-between border-b pb-3 mb-4">
+        <div>
+          <h2 class="text-lg sm:text-xl font-bold text-gray-900">Featured Products</h2>
+          <p class="text-xs text-gray-500">Trending picks hand-curated for you</p>
+        </div>
+        <a href="/products" class="text-blue-600 hover:text-blue-800 text-sm font-bold flex items-center gap-1">
+          Explore All <i class="fa-solid fa-chevron-right text-xs"></i>
+        </a>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+        <% if (featuredProducts && featuredProducts.length > 0) { %>
+          <% featuredProducts.forEach(product => { %>
+            <div class="group border border-gray-100 hover:border-gray-300 hover:shadow-lg rounded-md p-4 flex flex-col justify-between transition bg-white relative">
+              
+              <!-- Product Image -->
+              <a href="/products/<%= product.slug %>" class="block h-48 w-full mb-3 flex items-center justify-center overflow-hidden">
+                <img src="<%= product.images && product.images[0] ? product.images[0] : 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400' %>" 
+                     alt="<%= product.name %>" 
+                     class="max-h-full max-w-full object-contain group-hover:scale-105 transition duration-300">
+              </a>
+
+              <!-- Details -->
+              <div>
+                <div class="text-[11px] font-bold text-gray-400 uppercase tracking-wider"><%= product.brand %></div>
+                <a href="/products/<%= product.slug %>" class="text-sm font-medium text-gray-900 group-hover:text-blue-600 line-clamp-2 leading-snug">
+                  <%= product.name %>
+                </a>
+
+                <!-- Rating -->
+                <div class="flex items-center gap-1.5 mt-2">
+                  <span class="inline-flex items-center gap-0.5 bg-[#388e3c] text-white text-[11px] font-bold px-1.5 py-0.5 rounded">
+                    <%= product.ratingAvg || 4.2 %> <i class="fa-solid fa-star text-[9px]"></i>
+                  </span>
+                  <span class="text-xs text-gray-500">(<%= product.ratingCount || 120 %>)</span>
+                  <img src="https://static-assets-web.flixcart.com/fk-p-linchpin-web/fk-cp-zion/img/fa_62673a.png" alt="Flipkart Assured" class="h-4 object-contain ml-auto">
+                </div>
+
+                <!-- Price -->
+                <div class="flex items-baseline gap-2 mt-2">
+                  <span class="text-base font-bold text-gray-900">
+                    <%= formatPrice(product.discountPrice > 0 ? product.discountPrice : product.price) %>
+                  </span>
+                  <% if (product.discountPrice > 0 && product.discountPrice < product.price) { %>
+                    <span class="text-xs text-gray-500 line-through"><%= formatPrice(product.price) %></span>
+                    <span class="text-xs font-bold text-emerald-600">
+                      <%= Math.round(((product.price - product.discountPrice) / product.price) * 100) %>% off
+                    </span>
+                  <% } %>
+                </div>
+              </div>
+
+              <!-- Action button -->
+              <div class="mt-4 pt-2 border-t border-gray-100">
+                <form action="/cart/add" method="POST">
+                  <input type="hidden" name="productId" value="<%= product._id %>">
+                  <button type="submit" class="w-full bg-[#ff9f00] hover:bg-[#f39700] text-white text-xs font-bold py-2 rounded shadow-sm transition flex items-center justify-center gap-1.5">
+                    <i class="fa-solid fa-cart-plus"></i> ADD TO CART
+                  </button>
+                </form>
+              </div>
+
+            </div>
+          <% }) %>
+        <% } %>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<%- include('partials/footer') %>
+</body>
+</html>

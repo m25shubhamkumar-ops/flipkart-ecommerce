@@ -1,0 +1,148 @@
+<header class="bg-[#2874f0] text-white sticky top-0 z-50 shadow-md">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="flex items-center justify-between h-16 gap-4">
+      
+      <!-- Brand Logo -->
+      <div class="flex items-center space-x-2 flex-shrink-0">
+        <a href="/" class="flex flex-col items-start leading-none group">
+          <span class="text-2xl font-black italic tracking-wide text-white">Flipkart</span>
+          <span class="text-[11px] italic font-semibold text-gray-200 group-hover:text-yellow-300 transition-colors">
+            Explore <span class="text-[#ffe500] font-bold">Plus</span> <i class="fa-solid fa-plus text-[#ffe500] text-[9px]"></i>
+          </span>
+        </a>
+      </div>
+
+      <!-- Search Bar -->
+      <div class="flex-1 max-w-2xl mx-2 hidden sm:block">
+        <form action="/products" method="GET" class="relative flex items-center">
+          <input 
+            type="text" 
+            name="search" 
+            value="<%= typeof query !== 'undefined' && query.search ? query.search : '' %>"
+            placeholder="Search for products, brands and more" 
+            class="w-full py-2 pl-4 pr-10 text-sm text-gray-900 bg-white rounded-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-yellow-400 placeholder-gray-500"
+          />
+          <button type="submit" class="absolute right-0 top-0 bottom-0 px-3 text-[#2874f0] hover:text-blue-700">
+            <i class="fa-solid fa-magnifying-glass text-base"></i>
+          </button>
+        </form>
+      </div>
+
+      <!-- Right Navigation Actions -->
+      <div class="flex items-center space-x-4 sm:space-x-6 text-sm font-medium">
+        
+        <% if (!currentUser) { %>
+          <!-- Guest Navigation -->
+          <a href="/login" class="bg-white text-[#2874f0] font-bold px-7 py-1.5 rounded-sm hover:bg-gray-100 transition shadow-sm">
+            Login
+          </a>
+          <a href="/register?role=delivery" class="text-white hover:text-yellow-300 hidden md:inline-flex items-center gap-1 text-xs">
+            <i class="fa-solid fa-truck-fast"></i> Become Delivery Partner
+          </a>
+        <% } else { %>
+          
+          <!-- Role-Based Badge & Dropdown -->
+          <% if (currentUser.role === 'admin') { %>
+            <a href="/admin/dashboard" class="bg-purple-700 text-white text-xs font-bold px-2.5 py-1 rounded shadow inline-flex items-center gap-1.5 hover:bg-purple-800">
+              <i class="fa-solid fa-shield-halved"></i> Admin Panel
+            </a>
+          <% } else if (currentUser.role === 'delivery') { %>
+            <a href="/delivery/dashboard" class="bg-emerald-600 text-white text-xs font-bold px-2.5 py-1 rounded shadow inline-flex items-center gap-1.5 hover:bg-emerald-700">
+              <i class="fa-solid fa-truck text-xs"></i> Delivery Portal
+            </a>
+          <% } %>
+
+          <!-- User Account Menu -->
+          <div class="relative group">
+            <button class="flex items-center gap-1 hover:text-yellow-200 py-2 focus:outline-none">
+              <span class="max-w-[120px] truncate"><%= currentUser.name %></span>
+              <i class="fa-solid fa-chevron-down text-xs group-hover:rotate-180 transition-transform duration-200"></i>
+            </button>
+            <div class="absolute right-0 w-52 bg-white text-gray-800 rounded-sm shadow-xl py-2 hidden group-hover:block transition-all duration-200 z-50 border border-gray-100">
+              <div class="px-4 py-2 border-b border-gray-100 text-xs text-gray-500">
+                Logged in as <strong class="capitalize text-blue-600 font-bold"><%= currentUser.role %></strong>
+              </div>
+
+              <% if (currentUser.role === 'customer') { %>
+                <a href="/profile" class="block px-4 py-2.5 text-sm hover:bg-blue-50 hover:text-blue-600">
+                  <i class="fa-regular fa-user mr-2 text-blue-500"></i> My Profile
+                </a>
+                <a href="/orders" class="block px-4 py-2.5 text-sm hover:bg-blue-50 hover:text-blue-600">
+                  <i class="fa-solid fa-box mr-2 text-blue-500"></i> Orders
+                </a>
+                <a href="/wishlist" class="block px-4 py-2.5 text-sm hover:bg-blue-50 hover:text-blue-600">
+                  <i class="fa-regular fa-heart mr-2 text-blue-500"></i> Wishlist
+                </a>
+                <a href="/profile/addresses" class="block px-4 py-2.5 text-sm hover:bg-blue-50 hover:text-blue-600">
+                  <i class="fa-solid fa-map-location-dot mr-2 text-blue-500"></i> Addresses
+                </a>
+              <% } else if (currentUser.role === 'delivery') { %>
+                <a href="/delivery/dashboard" class="block px-4 py-2.5 text-sm hover:bg-emerald-50 hover:text-emerald-700">
+                  <i class="fa-solid fa-gauge mr-2 text-emerald-600"></i> Dashboard
+                </a>
+                <a href="/delivery/orders" class="block px-4 py-2.5 text-sm hover:bg-emerald-50 hover:text-emerald-700">
+                  <i class="fa-solid fa-dolly mr-2 text-emerald-600"></i> Assigned Shipments
+                </a>
+                <a href="/delivery/history" class="block px-4 py-2.5 text-sm hover:bg-emerald-50 hover:text-emerald-700">
+                  <i class="fa-solid fa-clipboard-check mr-2 text-emerald-600"></i> Delivery History
+                </a>
+              <% } else if (currentUser.role === 'admin') { %>
+                <a href="/admin/dashboard" class="block px-4 py-2.5 text-sm hover:bg-purple-50 hover:text-purple-700">
+                  <i class="fa-solid fa-chart-line mr-2 text-purple-600"></i> Admin Dashboard
+                </a>
+                <a href="/admin/orders" class="block px-4 py-2.5 text-sm hover:bg-purple-50 hover:text-purple-700">
+                  <i class="fa-solid fa-boxes-packing mr-2 text-purple-600"></i> Master Orders
+                </a>
+                <a href="/admin/products" class="block px-4 py-2.5 text-sm hover:bg-purple-50 hover:text-purple-700">
+                  <i class="fa-solid fa-tag mr-2 text-purple-600"></i> Product Catalog
+                </a>
+                <a href="/admin/users" class="block px-4 py-2.5 text-sm hover:bg-purple-50 hover:text-purple-700">
+                  <i class="fa-solid fa-users mr-2 text-purple-600"></i> User Directory
+                </a>
+                <a href="/admin/login-activity" class="block px-4 py-2.5 text-sm hover:bg-purple-50 hover:text-purple-700">
+                  <i class="fa-solid fa-user-shield mr-2 text-purple-600"></i> Login Activity Audit
+                </a>
+              <% } %>
+
+              <div class="border-t border-gray-100 mt-1"></div>
+              <a href="/logout" class="block px-4 py-2.5 text-sm text-red-600 hover:bg-red-50">
+                <i class="fa-solid fa-arrow-right-from-bracket mr-2"></i> Logout
+              </a>
+            </div>
+          </div>
+        <% } %>
+
+        <!-- Cart (Available for Customer & Guests) -->
+        <a href="/cart" class="flex items-center gap-1.5 hover:text-yellow-200">
+          <div class="relative">
+            <i class="fa-solid fa-cart-shopping text-lg"></i>
+            <% if (typeof cartCount !== 'undefined' && cartCount > 0) { %>
+              <span class="absolute -top-2 -right-2 bg-[#ff6161] text-white text-[10px] font-black rounded-full h-4 min-w-4 px-1 flex items-center justify-center shadow">
+                <%= cartCount %>
+              </span>
+            <% } %>
+          </div>
+          <span class="font-bold hidden sm:inline">Cart</span>
+        </a>
+
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Mobile Search Form (Visible on Small Screens) -->
+  <div class="sm:hidden px-4 pb-3">
+    <form action="/products" method="GET" class="relative flex items-center">
+      <input 
+        type="text" 
+        name="search" 
+        value="<%= typeof query !== 'undefined' && query.search ? query.search : '' %>"
+        placeholder="Search for products, brands and more" 
+        class="w-full py-2 pl-4 pr-10 text-sm text-gray-900 bg-white rounded-sm shadow-sm focus:outline-none"
+      />
+      <button type="submit" class="absolute right-0 top-0 bottom-0 px-3 text-[#2874f0]">
+        <i class="fa-solid fa-magnifying-glass"></i>
+      </button>
+    </form>
+  </div>
+</header>

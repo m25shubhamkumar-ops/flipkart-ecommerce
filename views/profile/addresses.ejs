@@ -1,0 +1,93 @@
+<%- include('../partials/head') %>
+<%- include('../partials/header') %>
+
+<main class="flex-grow py-6">
+  <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
+    
+    <div class="bg-white p-4 rounded-sm shadow-sm border border-gray-200 flex items-center justify-between text-xs">
+      <h1 class="text-base font-bold text-gray-900">Manage Delivery Addresses (<%= addresses.length %>)</h1>
+      <a href="/profile" class="text-blue-600 font-bold hover:underline">Back to Profile</a>
+    </div>
+
+    <!-- Add New Address Form -->
+    <div class="bg-white p-6 rounded-sm shadow-sm border border-gray-200 text-xs">
+      <h2 class="font-bold text-gray-900 border-b pb-3 mb-4 text-sm">+ Add a New Address</h2>
+      
+      <form action="/profile/addresses" method="POST" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <label class="block font-semibold mb-1">Full Name *</label>
+          <input type="text" name="fullName" required placeholder="Receiver's name" class="w-full p-2 border rounded text-xs">
+        </div>
+        <div>
+          <label class="block font-semibold mb-1">Mobile Number *</label>
+          <input type="tel" name="phone" required placeholder="10-digit number" class="w-full p-2 border rounded text-xs">
+        </div>
+        <div class="sm:col-span-2">
+          <label class="block font-semibold mb-1">Address (House No., Building, Street) *</label>
+          <input type="text" name="line1" required placeholder="Address Line 1" class="w-full p-2 border rounded text-xs">
+        </div>
+        <div>
+          <label class="block font-semibold mb-1">Locality / Landmark</label>
+          <input type="text" name="line2" placeholder="Address Line 2 (Optional)" class="w-full p-2 border rounded text-xs">
+        </div>
+        <div>
+          <label class="block font-semibold mb-1">City / Town *</label>
+          <input type="text" name="city" required placeholder="City" class="w-full p-2 border rounded text-xs">
+        </div>
+        <div>
+          <label class="block font-semibold mb-1">State *</label>
+          <input type="text" name="state" required placeholder="State" class="w-full p-2 border rounded text-xs">
+        </div>
+        <div>
+          <label class="block font-semibold mb-1">Pincode *</label>
+          <input type="text" name="pincode" required placeholder="6 digits" class="w-full p-2 border rounded text-xs">
+        </div>
+        <div class="sm:col-span-2 flex items-center gap-2">
+          <input type="checkbox" id="isDefault" name="isDefault" class="text-blue-600">
+          <label for="isDefault" class="font-semibold text-gray-700 cursor-pointer">Set as default shipping address</label>
+        </div>
+        <div class="sm:col-span-2">
+          <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 px-8 rounded text-xs shadow">
+            Save Address
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Address Cards -->
+    <div class="space-y-3">
+      <% addresses.forEach(addr => { %>
+        <div class="bg-white p-5 rounded-sm shadow-sm border border-gray-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 text-xs">
+          <div class="space-y-1">
+            <div class="flex items-center gap-2">
+              <span class="font-bold text-sm text-gray-900"><%= addr.fullName %></span>
+              <span class="text-gray-500 font-semibold"><%= addr.phone %></span>
+              <% if (addr.isDefault) { %>
+                <span class="bg-emerald-100 text-emerald-800 text-[10px] font-bold px-2 py-0.5 rounded">DEFAULT</span>
+              <% } %>
+            </div>
+            <p class="text-gray-600 leading-relaxed">
+              <%= addr.line1 %>, <%= addr.line2 ? addr.line2 + ', ' : '' %><%= addr.city %>, <%= addr.state %> - <strong><%= addr.pincode %></strong>
+            </p>
+          </div>
+
+          <div class="flex items-center gap-3">
+            <% if (!addr.isDefault) { %>
+              <form action="/profile/addresses/<%= addr._id %>/default" method="POST">
+                <button type="submit" class="text-blue-600 hover:underline font-bold">Set Default</button>
+              </form>
+            <% } %>
+            <form action="/profile/addresses/<%= addr._id %>/delete" method="POST" onsubmit="return confirm('Delete address?')">
+              <button type="submit" class="text-red-600 hover:underline font-bold">Delete</button>
+            </form>
+          </div>
+        </div>
+      <% }) %>
+    </div>
+
+  </div>
+</main>
+
+<%- include('../partials/footer') %>
+</body>
+</html>

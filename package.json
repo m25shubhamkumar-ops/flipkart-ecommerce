@@ -1,0 +1,38 @@
+{
+  "name": "flipkart-ecommerce",
+  "version": "1.0.0",
+  "description": "Full-stack Flipkart-style e-commerce platform with Customer, Delivery Agent, and Admin roles",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js",
+    "dev": "node --watch app.js",
+    "seed": "node seeds/seed.js",
+    "test": "node tests/rbac-and-flows.test.js"
+  },
+  "keywords": [
+    "ecommerce",
+    "express",
+    "ejs",
+    "mongodb",
+    "jwt",
+    "otp",
+    "audit-log",
+    "flipkart"
+  ],
+  "author": "Antigravity Engineering",
+  "license": "ISC",
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "cookie-parser": "^1.4.7",
+    "dotenv": "^16.4.7",
+    "ejs": "^3.1.10",
+    "express": "^4.21.2",
+    "express-rate-limit": "^7.5.0",
+    "helmet": "^8.0.0",
+    "jsonwebtoken": "^9.0.2",
+    "method-override": "^3.0.0",
+    "mongoose": "^8.9.5",
+    "nodemailer": "^6.9.16",
+    "useragent": "^2.3.0"
+  }
+}

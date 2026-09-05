@@ -1,0 +1,27 @@
+<%- include('../partials/head') %>
+<%- include('../partials/header') %>
+
+<main class="flex-grow flex items-center justify-center py-16 px-4">
+  <div class="max-w-md w-full bg-white p-8 rounded shadow-sm border border-red-200 text-center">
+    <div class="w-16 h-16 bg-red-100 text-red-600 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl">
+      <i class="fa-solid fa-ban"></i>
+    </div>
+    <div class="text-2xl font-black text-red-600 mb-1">403 Forbidden</div>
+    <h1 class="text-base font-bold text-gray-800 mb-2">Access Denied</h1>
+    <p class="text-xs text-gray-600 mb-6 leading-relaxed">
+      <%= typeof message !== 'undefined' ? message : 'You do not have the required permissions to access this portal or resource.' %>
+    </p>
+    <div class="space-y-2">
+      <a href="/" class="block w-full bg-[#2874f0] text-white font-bold text-xs py-2.5 rounded shadow">
+        Return to Shopping Marketplace
+      </a>
+      <a href="/logout" class="block w-full bg-gray-100 text-gray-700 font-bold text-xs py-2 rounded">
+        Switch Account / Login
+      </a>
+    </div>
+  </div>
+</main>
+
+<%- include('../partials/footer') %>
+</body>
+</html>

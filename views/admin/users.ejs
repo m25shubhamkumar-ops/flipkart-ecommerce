@@ -1,0 +1,97 @@
+<%- include('../partials/head') %>
+<%- include('../partials/header') %>
+
+<main class="flex-grow py-6">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-4">
+    
+    <div class="bg-white p-4 rounded-sm shadow-sm border border-gray-200 flex flex-wrap items-center justify-between gap-4 text-xs">
+      <div>
+        <h1 class="text-base font-bold text-gray-900">User Directory & Role Administration (<%= users.length %>)</h1>
+        <span class="text-gray-500">Manage user accounts, toggle access, and assign Delivery Agent or Admin roles.</span>
+      </div>
+
+      <!-- Filters & Search -->
+      <div class="flex flex-wrap items-center gap-2">
+        <form action="/admin/users" method="GET" class="flex gap-2">
+          <input type="text" name="search" value="<%= query.search || '' %>" placeholder="Search by name or email..." class="p-1.5 border rounded text-xs">
+          <button type="submit" class="bg-gray-100 hover:bg-gray-200 px-3 py-1.5 rounded font-bold">Search</button>
+        </form>
+
+        <div class="flex items-center gap-1 border rounded p-1">
+          <a href="/admin/users?role=all" class="px-2.5 py-1 rounded <%= currentRole === 'all' ? 'bg-purple-700 text-white font-bold' : 'hover:bg-gray-100' %>">All</a>
+          <a href="/admin/users?role=customer" class="px-2.5 py-1 rounded <%= currentRole === 'customer' ? 'bg-purple-700 text-white font-bold' : 'hover:bg-gray-100' %>">Customers</a>
+          <a href="/admin/users?role=delivery" class="px-2.5 py-1 rounded <%= currentRole === 'delivery' ? 'bg-purple-700 text-white font-bold' : 'hover:bg-gray-100' %>">Delivery Agents</a>
+          <a href="/admin/users?role=admin" class="px-2.5 py-1 rounded <%= currentRole === 'admin' ? 'bg-purple-700 text-white font-bold' : 'hover:bg-gray-100' %>">Admins</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Users Table -->
+    <div class="bg-white rounded-sm shadow-sm border border-gray-200 overflow-x-auto text-xs">
+      <table class="w-full text-left">
+        <thead class="bg-gray-50 text-gray-500 uppercase text-[10px]">
+          <tr>
+            <th class="p-3">User Details</th>
+            <th class="p-3">Phone</th>
+            <th class="p-3">Joined Date</th>
+            <th class="p-3">Email Verified</th>
+            <th class="p-3">Current Role</th>
+            <th class="p-3">Change Role</th>
+            <th class="p-3 text-right">Account Status</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-100">
+          <% users.forEach(user => { %>
+            <tr class="hover:bg-gray-50">
+              <td class="p-3">
+                <div class="font-bold text-gray-900"><%= user.name %></div>
+                <div class="text-gray-400 text-[11px]"><%= user.email %></div>
+              </td>
+              <td class="p-3 text-gray-600"><%= user.phone || 'N/A' %></td>
+              <td class="p-3 text-gray-500"><%= formatDate(user.createdAt) %></td>
+              <td class="p-3">
+                <span class="<%= user.isVerified ? 'text-emerald-700 bg-emerald-50' : 'text-amber-700 bg-amber-50' %> font-bold px-2 py-0.5 rounded text-[10px]">
+                  <%= user.isVerified ? 'Verified' : 'Pending' %>
+                </span>
+              </td>
+              <td class="p-3">
+                <% if (user.role === 'admin') { %>
+                  <span class="bg-purple-100 text-purple-800 font-bold px-2 py-0.5 rounded text-[10px]">👑 Admin</span>
+                <% } else if (user.role === 'delivery') { %>
+                  <span class="bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded text-[10px]">🚚 Delivery Agent</span>
+                <% } else { %>
+                  <span class="bg-blue-100 text-blue-800 font-bold px-2 py-0.5 rounded text-[10px]">🛒 Customer</span>
+                <% } %>
+              </td>
+
+              <!-- Role mutation form -->
+              <td class="p-3">
+                <form action="/admin/users/<%= user._id %>/role" method="POST" class="inline">
+                  <select name="role" class="p-1 border rounded bg-white text-[11px]" onchange="this.form.submit()">
+                    <option value="customer" <%= user.role === 'customer' ? 'selected' : '' %>>Customer</option>
+                    <option value="delivery" <%= user.role === 'delivery' ? 'selected' : '' %>>Delivery Agent</option>
+                    <option value="admin" <%= user.role === 'admin' ? 'selected' : '' %>>Admin</option>
+                  </select>
+                </form>
+              </td>
+
+              <!-- Active status toggle -->
+              <td class="p-3 text-right">
+                <form action="/admin/users/<%= user._id %>/toggle-status" method="POST" class="inline">
+                  <button type="submit" class="font-bold px-3 py-1 rounded text-[10px] <%= user.isActive ? 'bg-red-50 text-red-600 hover:bg-red-100' : 'bg-emerald-50 text-emerald-600 hover:bg-emerald-100' %>">
+                    <%= user.isActive ? 'Deactivate' : 'Activate' %>
+                  </button>
+                </form>
+              </td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+</main>
+
+<%- include('../partials/footer') %>
+</body>
+</html>

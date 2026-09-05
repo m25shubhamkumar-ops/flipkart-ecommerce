@@ -1,0 +1,118 @@
+<%- include('../partials/head') %>
+<%- include('../partials/header') %>
+
+<main class="flex-grow py-6">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
+    
+    <!-- Portal Header Banner -->
+    <div class="bg-gradient-to-r from-emerald-700 to-teal-800 text-white p-6 rounded-md shadow flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+      <div>
+        <div class="inline-flex items-center gap-1.5 bg-emerald-900/50 text-emerald-200 text-xs px-2.5 py-0.5 rounded font-bold uppercase tracking-wider mb-2">
+          <i class="fa-solid fa-truck-fast"></i> Flipkart Logistics Portal
+        </div>
+        <h1 class="text-2xl font-black">Welcome, <%= currentUser.name %>!</h1>
+        <p class="text-xs text-emerald-100 mt-1">Delivery Agent ID: <%= currentUser._id.toString().slice(-6) %> • Active on Duty</p>
+      </div>
+      <a href="/delivery/orders" class="bg-white text-emerald-800 font-bold px-5 py-2.5 rounded text-xs shadow hover:bg-emerald-50 transition">
+        View All Assigned Shipments
+      </a>
+    </div>
+
+    <!-- Metric KPI Cards -->
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      
+      <div class="bg-white p-5 rounded-sm shadow-sm border border-gray-200 flex items-center justify-between">
+        <div>
+          <div class="text-xs text-gray-500 font-medium uppercase tracking-wider">Total Assigned</div>
+          <div class="text-2xl font-black text-gray-900 mt-1"><%= stats.totalAssigned %></div>
+        </div>
+        <div class="w-12 h-12 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center text-xl">
+          <i class="fa-solid fa-boxes-packing"></i>
+        </div>
+      </div>
+
+      <div class="bg-white p-5 rounded-sm shadow-sm border border-gray-200 flex items-center justify-between">
+        <div>
+          <div class="text-xs text-gray-500 font-medium uppercase tracking-wider">Active In-Transit</div>
+          <div class="text-2xl font-black text-amber-600 mt-1"><%= stats.activeDeliveries %></div>
+        </div>
+        <div class="w-12 h-12 bg-amber-50 text-amber-600 rounded-full flex items-center justify-center text-xl">
+          <i class="fa-solid fa-truck-ramp-box"></i>
+        </div>
+      </div>
+
+      <div class="bg-white p-5 rounded-sm shadow-sm border border-gray-200 flex items-center justify-between">
+        <div>
+          <div class="text-xs text-gray-500 font-medium uppercase tracking-wider">Completed Today</div>
+          <div class="text-2xl font-black text-emerald-600 mt-1"><%= stats.completedToday %></div>
+        </div>
+        <div class="w-12 h-12 bg-emerald-50 text-emerald-600 rounded-full flex items-center justify-center text-xl">
+          <i class="fa-solid fa-circle-check"></i>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Active Shipments Table -->
+    <div class="bg-white rounded-sm shadow-sm border border-gray-200 p-6">
+      <div class="flex items-center justify-between border-b pb-4 mb-4">
+        <h2 class="text-base font-bold text-gray-900">Shipments Requiring Action</h2>
+        <a href="/delivery/orders?status=active" class="text-xs text-emerald-600 font-bold hover:underline">
+          View Active List
+        </a>
+      </div>
+
+      <% if (!shipments || shipments.length === 0) { %>
+        <p class="text-xs text-gray-500 py-6 text-center italic">No pending shipments at this moment. You're all caught up!</p>
+      <% } else { %>
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-xs">
+            <thead class="bg-gray-50 text-gray-500 uppercase text-[10px]">
+              <tr>
+                <th class="p-3">Order #</th>
+                <th class="p-3">Customer</th>
+                <th class="p-3">Delivery Area</th>
+                <th class="p-3">Payment</th>
+                <th class="p-3">Status</th>
+                <th class="p-3 text-right">Action</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-100">
+              <% shipments.forEach(sh => { %>
+                <tr class="hover:bg-gray-50">
+                  <td class="p-3 font-bold text-gray-900">#<%= sh.orderNumber %></td>
+                  <td class="p-3">
+                    <div class="font-medium"><%= sh.addressSnapshot.fullName %></div>
+                    <div class="text-gray-400 text-[11px]"><%= sh.addressSnapshot.phone %></div>
+                  </td>
+                  <td class="p-3 text-gray-600">
+                    <%= sh.addressSnapshot.city %>, <%= sh.addressSnapshot.pincode %>
+                  </td>
+                  <td class="p-3">
+                    <span class="font-bold"><%= formatPrice(sh.totals.grandTotal) %></span>
+                    <span class="text-[10px] text-gray-500 block uppercase"><%= sh.paymentMethod %> (<%= sh.paymentStatus %>)</span>
+                  </td>
+                  <td class="p-3">
+                    <span class="bg-amber-100 text-amber-800 text-[10px] font-bold px-2 py-0.5 rounded">
+                      <%= sh.orderStatus %>
+                    </span>
+                  </td>
+                  <td class="p-3 text-right">
+                    <a href="/delivery/orders/<%= sh._id %>" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-3 py-1.5 rounded text-[11px] inline-flex items-center gap-1">
+                      Update <i class="fa-solid fa-pen-to-square text-[9px]"></i>
+                    </a>
+                  </td>
+                </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        </div>
+      <% } %>
+    </div>
+
+  </div>
+</main>
+
+<%- include('../partials/footer') %>
+</body>
+</html>

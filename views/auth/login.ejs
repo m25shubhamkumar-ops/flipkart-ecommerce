@@ -1,0 +1,85 @@
+<%- include('../partials/head') %>
+<%- include('../partials/header') %>
+
+<main class="flex-grow flex items-center justify-center py-10 px-4">
+  <div class="max-w-3xl w-full bg-white rounded shadow-md overflow-hidden grid grid-cols-1 md:grid-cols-12 min-h-[480px]">
+    
+    <!-- Left Blue Info Panel -->
+    <div class="md:col-span-5 bg-[#2874f0] p-8 text-white flex flex-col justify-between">
+      <div>
+        <h2 class="text-2xl font-black">Login</h2>
+        <p class="text-blue-100 text-sm mt-3 leading-relaxed">
+          Get access to your Orders, Wishlist, Recommendations, and Role Portals.
+        </p>
+      </div>
+      <div class="hidden md:block mt-8">
+        <img src="https://static-assets-web.flixcart.com/fk-p-linchpin-web/fk-cp-zion/img/login_img_c4a81e.png" alt="Shopping illustration" class="max-w-full">
+      </div>
+    </div>
+
+    <!-- Right Login Form -->
+    <div class="md:col-span-7 p-8 flex flex-col justify-between">
+      <div>
+        <h3 class="text-lg font-bold text-gray-800 mb-4">Sign in to Flipkart</h3>
+        <%- include('../partials/alerts') %>
+
+        <form action="/login" method="POST" class="space-y-4 text-xs">
+          <input type="hidden" name="redirect" value="<%= redirect %>">
+
+          <div>
+            <label class="block text-gray-600 font-semibold mb-1">Email Address *</label>
+            <input type="email" id="emailInput" name="email" required placeholder="Enter your email" class="w-full p-2.5 border border-gray-300 rounded focus:border-blue-500 focus:outline-none text-xs">
+          </div>
+
+          <div>
+            <div class="flex items-center justify-between mb-1">
+              <label class="text-gray-600 font-semibold">Password *</label>
+              <a href="/forgot-password" class="text-blue-600 text-[11px] font-bold hover:underline">Forgot?</a>
+            </div>
+            <input type="password" id="passwordInput" name="password" required placeholder="Enter password" class="w-full p-2.5 border border-gray-300 rounded focus:border-blue-500 focus:outline-none text-xs">
+          </div>
+
+          <button type="submit" class="w-full bg-[#fb641b] hover:bg-[#ea550d] text-white font-bold py-3 rounded-sm uppercase tracking-wider text-xs shadow transition">
+            Login
+          </button>
+        </form>
+
+        <!-- Quick Demo Credentials Box for Evaluation / Viva -->
+        <div class="mt-6 pt-4 border-t border-gray-200">
+          <div class="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-2">⚡ Quick 1-Click Demo Logins:</div>
+          <div class="grid grid-cols-3 gap-1.5 text-[10px]">
+            <button onclick="fillDemo('customer@flipkart.com', 'Customer@12345')" class="p-1.5 bg-blue-50 hover:bg-blue-100 text-blue-700 font-bold rounded border border-blue-200 text-center">
+              🛒 Customer
+            </button>
+            <button onclick="fillDemo('delivery@flipkart.com', 'Delivery@12345')" class="p-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-bold rounded border border-emerald-200 text-center">
+              🚚 Delivery Agent
+            </button>
+            <button onclick="fillDemo('admin@flipkart.com', 'Admin@12345')" class="p-1.5 bg-purple-50 hover:bg-purple-100 text-purple-700 font-bold rounded border border-purple-200 text-center">
+              👑 Admin
+            </button>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="mt-6 pt-4 border-t text-center">
+        <a href="/register" class="text-blue-600 font-bold text-xs hover:underline">
+          New to Flipkart? Create an account
+        </a>
+      </div>
+
+    </div>
+
+  </div>
+</main>
+
+<script>
+  function fillDemo(email, pass) {
+    document.getElementById('emailInput').value = email;
+    document.getElementById('passwordInput').value = pass;
+  }
+</script>
+
+<%- include('../partials/footer') %>
+</body>
+</html>

@@ -1,0 +1,46 @@
+<%- include('../partials/head') %>
+<%- include('../partials/header') %>
+
+<main class="flex-grow py-6">
+  <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 space-y-4">
+    <div class="bg-white p-4 rounded-sm shadow-sm border border-gray-200 flex items-center justify-between text-xs">
+      <h1 class="text-base font-bold text-gray-900">Completed Delivery Archive (<%= orders.length %>)</h1>
+      <a href="/delivery/dashboard" class="text-emerald-600 font-bold hover:underline">Back to Dashboard</a>
+    </div>
+
+    <% if (!orders || orders.length === 0) { %>
+      <div class="bg-white p-12 text-center rounded-sm border border-gray-200 text-xs text-gray-500">
+        No completed deliveries recorded yet.
+      </div>
+    <% } else { %>
+      <div class="bg-white rounded-sm shadow-sm border border-gray-200 overflow-x-auto text-xs">
+        <table class="w-full text-left">
+          <thead class="bg-gray-50 text-gray-500 uppercase text-[10px]">
+            <tr>
+              <th class="p-3">Order Number</th>
+              <th class="p-3">Customer</th>
+              <th class="p-3">Delivered Date</th>
+              <th class="p-3">Value</th>
+              <th class="p-3">Remarks</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-gray-100">
+            <% orders.forEach(ord => { %>
+              <tr class="hover:bg-gray-50">
+                <td class="p-3 font-bold text-gray-900">#<%= ord.orderNumber %></td>
+                <td class="p-3"><%= ord.addressSnapshot.fullName %> (<%= ord.addressSnapshot.city %>)</td>
+                <td class="p-3 text-gray-600"><%= formatDate(ord.updatedAt) %></td>
+                <td class="p-3 font-bold"><%= formatPrice(ord.totals.grandTotal) %></td>
+                <td class="p-3 text-gray-500 italic"><%= ord.deliveryNotes || 'Completed standard delivery' %></td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
+    <% } %>
+  </div>
+</main>
+
+<%- include('../partials/footer') %>
+</body>
+</html>

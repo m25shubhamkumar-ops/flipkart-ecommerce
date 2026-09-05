@@ -1,0 +1,82 @@
+<%- include('../partials/head') %>
+<%- include('../partials/header') %>
+
+<main class="flex-grow py-6">
+  <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
+    
+    <div class="bg-white p-6 rounded-sm shadow-sm border border-gray-200 flex items-center justify-between">
+      <div class="flex items-center gap-4">
+        <div class="w-16 h-16 rounded-full bg-blue-600 text-white font-black text-2xl flex items-center justify-center">
+          <%= user.name.charAt(0).toUpperCase() %>
+        </div>
+        <div>
+          <h1 class="text-xl font-bold text-gray-900">Hello, <%= user.name %></h1>
+          <div class="text-xs text-gray-500"><%= user.email %> • Role: <strong class="capitalize text-blue-600"><%= user.role %></strong></div>
+        </div>
+      </div>
+      <div class="flex gap-2">
+        <a href="/orders" class="bg-gray-100 hover:bg-gray-200 text-gray-800 font-bold px-4 py-2 rounded text-xs">
+          Orders (<%= orderCount %>)
+        </a>
+        <a href="/profile/addresses" class="bg-gray-100 hover:bg-gray-200 text-gray-800 font-bold px-4 py-2 rounded text-xs">
+          Addresses (<%= addressCount %>)
+        </a>
+      </div>
+    </div>
+
+    <%- include('../partials/alerts') %>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      
+      <!-- Personal Details Form -->
+      <div class="bg-white p-6 rounded-sm shadow-sm border border-gray-200 text-xs">
+        <h2 class="font-bold text-gray-900 border-b pb-3 mb-4 text-sm">Personal Information</h2>
+        <form action="/profile/update" method="POST" class="space-y-4">
+          <div>
+            <label class="block font-semibold text-gray-700 mb-1">Full Name</label>
+            <input type="text" name="name" value="<%= user.name %>" required class="w-full p-2.5 border rounded text-xs">
+          </div>
+          <div>
+            <label class="block font-semibold text-gray-700 mb-1">Email (Registered)</label>
+            <input type="email" value="<%= user.email %>" disabled class="w-full p-2.5 border rounded text-xs bg-gray-50 text-gray-500">
+          </div>
+          <div>
+            <label class="block font-semibold text-gray-700 mb-1">Mobile Number</label>
+            <input type="tel" name="phone" value="<%= user.phone || '' %>" placeholder="Enter 10-digit number" class="w-full p-2.5 border rounded text-xs">
+          </div>
+          <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded text-xs">
+            Save Profile
+          </button>
+        </form>
+      </div>
+
+      <!-- Security / Change Password Form -->
+      <div class="bg-white p-6 rounded-sm shadow-sm border border-gray-200 text-xs">
+        <h2 class="font-bold text-gray-900 border-b pb-3 mb-4 text-sm">Security & Password</h2>
+        <form action="/profile/change-password" method="POST" class="space-y-4">
+          <div>
+            <label class="block font-semibold text-gray-700 mb-1">Current Password</label>
+            <input type="password" name="currentPassword" required placeholder="Enter current password" class="w-full p-2.5 border rounded text-xs">
+          </div>
+          <div>
+            <label class="block font-semibold text-gray-700 mb-1">New Password</label>
+            <input type="password" name="newPassword" required placeholder="Min 6 characters" class="w-full p-2.5 border rounded text-xs">
+          </div>
+          <div>
+            <label class="block font-semibold text-gray-700 mb-1">Confirm New Password</label>
+            <input type="password" name="confirmNewPassword" required placeholder="Repeat new password" class="w-full p-2.5 border rounded text-xs">
+          </div>
+          <button type="submit" class="bg-[#fb641b] hover:bg-[#ea550d] text-white font-bold py-2 px-6 rounded text-xs">
+            Update Password
+          </button>
+        </form>
+      </div>
+
+    </div>
+
+  </div>
+</main>
+
+<%- include('../partials/footer') %>
+</body>
+</html>

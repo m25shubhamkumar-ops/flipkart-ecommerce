@@ -1,0 +1,226 @@
+<%- include('../partials/head') %>
+<%- include('../partials/header') %>
+
+<main class="flex-grow py-6">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+      
+      <!-- Left Column: Checkout Accordion Steps (8 cols) -->
+      <div class="lg:col-span-8 space-y-4">
+        
+        <!-- Step 1: Login Check (Complete) -->
+        <div class="bg-white p-4 rounded-sm shadow-sm border border-gray-200 flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <span class="w-6 h-6 rounded-full bg-blue-600 text-white text-xs font-bold flex items-center justify-center">1</span>
+            <div>
+              <span class="text-xs font-bold text-gray-500 uppercase">Login</span>
+              <div class="text-xs font-bold text-gray-900"><%= currentUser.name %> <span class="text-gray-500 font-normal">(<%= currentUser.email %>)</span></div>
+            </div>
+          </div>
+          <span class="text-xs font-bold text-emerald-600"><i class="fa-solid fa-check"></i> Verified</span>
+        </div>
+
+        <!-- Step 2: Delivery Address Selection -->
+        <div class="bg-white rounded-sm shadow-sm border border-gray-200 overflow-hidden">
+          <div class="bg-blue-600 text-white p-3 flex items-center gap-3">
+            <span class="w-6 h-6 rounded-full bg-white text-blue-600 text-xs font-bold flex items-center justify-center">2</span>
+            <span class="text-xs font-bold uppercase tracking-wider">Delivery Address</span>
+          </div>
+
+          <div class="p-4">
+            <form action="/checkout" method="POST" id="checkoutForm" class="space-y-4">
+              
+              <% if (addresses && addresses.length > 0) { %>
+                <div class="space-y-3">
+                  <% addresses.forEach((addr, idx) => { %>
+                    <label class="block p-3 border rounded cursor-pointer hover:border-blue-500 transition <%= addr.isDefault || idx === 0 ? 'border-blue-500 bg-blue-50/30' : 'border-gray-200' %>">
+                      <div class="flex items-start gap-3">
+                        <input type="radio" name="addressId" value="<%= addr._id %>" <%= addr.isDefault || idx === 0 ? 'checked' : '' %> required class="mt-1 text-blue-600">
+                        <div class="text-xs space-y-1">
+                          <div class="font-bold text-gray-900">
+                            <%= addr.fullName %> 
+                            <span class="font-normal text-gray-500 ml-2"><%= addr.phone %></span>
+                            <% if (addr.isDefault) { %>
+                              <span class="bg-gray-200 text-gray-700 text-[10px] font-bold px-1.5 py-0.5 rounded ml-2">DEFAULT</span>
+                            <% } %>
+                          </div>
+                          <div class="text-gray-600">
+                            <%= addr.line1 %>, <%= addr.line2 ? addr.line2 + ', ' : '' %><%= addr.city %>, <%= addr.state %> - <strong class="text-gray-900"><%= addr.pincode %></strong>
+                          </div>
+                        </div>
+                      </div>
+                    </label>
+                  <% }) %>
+                </div>
+              <% } else { %>
+                <div class="p-4 bg-amber-50 border border-amber-200 text-xs text-amber-800 rounded">
+                  No saved delivery addresses found. Please enter your address below to continue.
+                </div>
+              <% } %>
+
+              <!-- Add New Address Toggle / Form -->
+              <details class="group border border-dashed border-gray-300 rounded p-3 text-xs">
+                <summary class="font-bold text-blue-600 cursor-pointer flex items-center gap-1.5">
+                  <i class="fa-solid fa-plus text-xs"></i> Add a new address
+                </summary>
+                <div class="mt-4 pt-3 border-t grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label class="block font-medium mb-1">Full Name</label>
+                    <input type="text" form="newAddrForm" name="fullName" required placeholder="Receiver's name" class="w-full p-2 border rounded text-xs">
+                  </div>
+                  <div>
+                    <label class="block font-medium mb-1">10-digit mobile number</label>
+                    <input type="tel" form="newAddrForm" name="phone" required placeholder="Phone number" class="w-full p-2 border rounded text-xs">
+                  </div>
+                  <div class="sm:col-span-2">
+                    <label class="block font-medium mb-1">Street Address / House No.</label>
+                    <input type="text" form="newAddrForm" name="line1" required placeholder="Address line 1" class="w-full p-2 border rounded text-xs">
+                  </div>
+                  <div>
+                    <label class="block font-medium mb-1">City / District</label>
+                    <input type="text" form="newAddrForm" name="city" required placeholder="City" class="w-full p-2 border rounded text-xs">
+                  </div>
+                  <div>
+                    <label class="block font-medium mb-1">State</label>
+                    <input type="text" form="newAddrForm" name="state" required placeholder="State" class="w-full p-2 border rounded text-xs">
+                  </div>
+                  <div>
+                    <label class="block font-medium mb-1">Pincode</label>
+                    <input type="text" form="newAddrForm" name="pincode" required placeholder="6 digits PIN" class="w-full p-2 border rounded text-xs">
+                  </div>
+                  <div class="sm:col-span-2">
+                    <button type="submit" form="newAddrForm" class="bg-blue-600 text-white font-bold py-2 px-6 rounded text-xs">
+                      Save & Use Address
+                    </button>
+                  </div>
+                </div>
+              </details>
+
+              <!-- Step 3: Order Preview -->
+              <div class="pt-4 border-t">
+                <h3 class="text-xs font-bold uppercase text-gray-500 mb-2">Order Items Preview (<%= items.length %> items)</h3>
+                <div class="space-y-2">
+                  <% items.forEach(item => { %>
+                    <div class="flex items-center justify-between text-xs py-1 border-b border-gray-100 last:border-0">
+                      <div class="flex items-center gap-2">
+                        <img src="<%= item.productId.images && item.productId.images[0] ? item.productId.images[0] : '' %>" class="w-10 h-10 object-contain">
+                        <div>
+                          <div class="font-medium text-gray-800 line-clamp-1"><%= item.productId.name %></div>
+                          <div class="text-gray-400">Qty: <%= item.quantity %></div>
+                        </div>
+                      </div>
+                      <div class="font-bold text-gray-900">
+                        <%= formatPrice((item.productId.discountPrice > 0 ? item.productId.discountPrice : item.productId.price) * item.quantity) %>
+                      </div>
+                    </div>
+                  <% }) %>
+                </div>
+              </div>
+
+              <!-- Step 4: Payment Options -->
+              <div class="pt-4 border-t">
+                <h3 class="text-xs font-bold uppercase text-gray-800 mb-3">Select Payment Mode</h3>
+                <div class="space-y-2 text-xs">
+                  
+                  <label class="flex items-center gap-3 p-3 border rounded cursor-pointer hover:bg-gray-50 border-blue-400 bg-blue-50/20">
+                    <input type="radio" name="paymentMethod" value="COD" checked class="text-blue-600">
+                    <div>
+                      <div class="font-bold text-gray-900 flex items-center gap-2">
+                        <i class="fa-solid fa-money-bill-wave text-emerald-600"></i> Cash on Delivery (COD)
+                      </div>
+                      <div class="text-gray-500">Pay cash or UPI at the doorstep when package arrives.</div>
+                    </div>
+                  </label>
+
+                  <label class="flex items-center gap-3 p-3 border rounded cursor-pointer hover:bg-gray-50 border-gray-200">
+                    <input type="radio" name="paymentMethod" value="Mock_Card" class="text-blue-600">
+                    <div>
+                      <div class="font-bold text-gray-900 flex items-center gap-2">
+                        <i class="fa-solid fa-credit-card text-blue-600"></i> Credit / Debit / ATM Card (Simulated)
+                      </div>
+                      <div class="text-gray-500">Fast instant verification sandbox payment mode.</div>
+                    </div>
+                  </label>
+
+                  <label class="flex items-center gap-3 p-3 border rounded cursor-pointer hover:bg-gray-50 border-gray-200">
+                    <input type="radio" name="paymentMethod" value="Mock_UPI" class="text-blue-600">
+                    <div>
+                      <div class="font-bold text-gray-900 flex items-center gap-2">
+                        <i class="fa-solid fa-mobile-screen text-purple-600"></i> UPI (PhonePe / Google Pay / Paytm)
+                      </div>
+                      <div class="text-gray-500">Instant UPI payment simulation.</div>
+                    </div>
+                  </label>
+
+                </div>
+              </div>
+
+              <!-- Submit CTA -->
+              <div class="pt-4 flex justify-end">
+                <button type="submit" class="bg-[#fb641b] hover:bg-[#ea550d] text-white font-bold py-3 px-12 rounded-sm text-sm uppercase tracking-wider shadow">
+                  Confirm & Place Order
+                </button>
+              </div>
+
+            </form>
+
+            <!-- Auxiliary form for adding address if needed -->
+            <form action="/profile/addresses" method="POST" id="newAddrForm" class="hidden">
+              <input type="hidden" name="redirect" value="/checkout">
+            </form>
+
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Right Column: Price Summary (4 cols) -->
+      <div class="lg:col-span-4 bg-white rounded-sm shadow-sm border border-gray-200 sticky top-20">
+        <div class="p-4 border-b border-gray-200">
+          <h2 class="text-xs font-bold text-gray-400 uppercase tracking-wider">Price Details</h2>
+        </div>
+
+        <div class="p-4 space-y-3 text-xs text-gray-700">
+          <div class="flex justify-between">
+            <span>Price (<%= items.length %> items)</span>
+            <span class="font-medium"><%= formatPrice(totals.subtotal) %></span>
+          </div>
+
+          <div class="flex justify-between text-emerald-600 font-medium">
+            <span>Discount</span>
+            <span>- <%= formatPrice(totals.discount) %></span>
+          </div>
+
+          <div class="flex justify-between">
+            <span>Delivery Charges</span>
+            <span>
+              <% if (totals.shipping === 0) { %>
+                <span class="text-emerald-600 font-bold">FREE</span>
+              <% } else { %>
+                <span class="font-medium"><%= formatPrice(totals.shipping) %></span>
+              <% } %>
+            </span>
+          </div>
+
+          <div class="border-t border-dashed border-gray-200 pt-3 flex justify-between text-sm font-black text-gray-900">
+            <span>Total Payable</span>
+            <span><%= formatPrice(totals.grandTotal) %></span>
+          </div>
+
+          <% if (totals.discount > 0) { %>
+            <div class="pt-2 text-emerald-600 font-bold text-[11px] border-t border-gray-100">
+              Your Total Savings on this order: <%= formatPrice(totals.discount) %>
+            </div>
+          <% } %>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+</main>
+
+<%- include('../partials/footer') %>
+</body>
+</html>

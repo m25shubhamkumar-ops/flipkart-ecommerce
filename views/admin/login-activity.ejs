@@ -1,0 +1,128 @@
+<%- include('../partials/head') %>
+<%- include('../partials/header') %>
+
+<main class="flex-grow py-6">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-4">
+    
+    <!-- Top Header -->
+    <div class="bg-white p-4 rounded-sm shadow-sm border border-gray-200 flex flex-wrap items-center justify-between gap-4 text-xs">
+      <div>
+        <h1 class="text-base font-bold text-gray-900 flex items-center gap-2">
+          <i class="fa-solid fa-user-shield text-purple-700"></i>
+          Authentication Activity & Audit Trail (<%= totalLogs %> records)
+        </h1>
+        <span class="text-gray-500">Security observability log recording all customer, delivery agent, and admin authentication attempts.</span>
+      </div>
+
+      <!-- Search & Filters (PDF Section 5) -->
+      <form action="/admin/login-activity" method="GET" class="flex flex-wrap items-center gap-2">
+        <input 
+          type="text" 
+          name="email" 
+          value="<%= query.email || '' %>" 
+          placeholder="Filter by email..." 
+          class="p-1.5 border rounded text-xs"
+        >
+        <select name="status" class="p-1.5 border rounded bg-white text-xs">
+          <option value="all" <%= !query.status || query.status === 'all' ? 'selected' : '' %>>All Statuses</option>
+          <option value="success" <%= query.status === 'success' ? 'selected' : '' %>>Success</option>
+          <option value="failed" <%= query.status === 'failed' ? 'selected' : '' %>>Failed</option>
+        </select>
+        <button type="submit" class="bg-purple-700 hover:bg-purple-800 text-white font-bold px-3 py-1.5 rounded text-xs shadow">
+          Filter
+        </button>
+        <% if (query.email || query.status) { %>
+          <a href="/admin/login-activity" class="text-gray-500 hover:text-gray-800 px-2 text-xs">Reset</a>
+        <% } %>
+      </form>
+    </div>
+
+    <!-- Audit Logs Table -->
+    <div class="bg-white rounded-sm shadow-sm border border-gray-200 overflow-x-auto text-xs">
+      <table class="w-full text-left">
+        <thead class="bg-gray-50 text-gray-500 uppercase text-[10px]">
+          <tr>
+            <th class="p-3">User / Email</th>
+            <th class="p-3">Status</th>
+            <th class="p-3">Login Time</th>
+            <th class="p-3">Logout Time</th>
+            <th class="p-3">IP Address</th>
+            <th class="p-3">Device & Browser</th>
+            <th class="p-3">OS</th>
+            <th class="p-3">Auth Method</th>
+            <th class="p-3">Reason / Details</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-100">
+          <% if (!logs || logs.length === 0) { %>
+            <tr>
+              <td colspan="9" class="p-8 text-center text-gray-500 italic">No audit records found matching criteria.</td>
+            </tr>
+          <% } else { %>
+            <% logs.forEach(log => { %>
+              <tr class="hover:bg-gray-50">
+                <td class="p-3 font-semibold text-gray-900 font-mono text-[11px]"><%= log.email %></td>
+                <td class="p-3">
+                  <% if (log.status === 'success') { %>
+                    <span class="bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded text-[10px] inline-flex items-center gap-1">
+                      <i class="fa-solid fa-circle-check text-[8px]"></i> SUCCESS
+                    </span>
+                  <% } else { %>
+                    <span class="bg-red-100 text-red-800 font-bold px-2 py-0.5 rounded text-[10px] inline-flex items-center gap-1">
+                      <i class="fa-solid fa-triangle-exclamation text-[8px]"></i> FAILED
+                    </span>
+                  <% } %>
+                </td>
+                <td class="p-3 text-gray-600"><%= formatDate(log.loginTime) %></td>
+                <td class="p-3 text-gray-500">
+                  <%= log.logoutTime ? formatDate(log.logoutTime) : '<span class="text-gray-400 italic">Active / Pending</span>' %>
+                </td>
+                <td class="p-3 font-mono text-gray-700"><%= log.ipAddress %></td>
+                <td class="p-3">
+                  <div class="font-medium text-gray-800"><%= log.browser %></div>
+                  <div class="text-[10px] text-gray-400"><%= log.device %></div>
+                </td>
+                <td class="p-3 text-gray-600"><%= log.operatingSystem %></td>
+                <td class="p-3">
+                  <span class="bg-gray-100 text-gray-700 px-1.5 py-0.5 rounded font-mono text-[10px]">
+                    <%= log.authenticationMethod %>
+                  </span>
+                </td>
+                <td class="p-3">
+                  <% if (log.failureReason) { %>
+                    <span class="text-red-600 font-medium"><%= log.failureReason %></span>
+                  <% } else { %>
+                    <span class="text-emerald-600 font-medium">Session Authorized</span>
+                  <% } %>
+                </td>
+              </tr>
+            <% }) %>
+          <% } %>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Pagination -->
+    <% if (totalPages > 1) { %>
+      <div class="bg-white p-3 rounded-sm border border-gray-200 flex items-center justify-between text-xs">
+        <div>Showing Page <%= currentPage %> of <%= totalPages %></div>
+        <div class="flex gap-1">
+          <% if (currentPage > 1) { %>
+            <a href="/admin/login-activity?<%= new URLSearchParams({ ...query, page: currentPage - 1 }).toString() %>" class="px-3 py-1 border rounded hover:bg-gray-50 font-bold">Previous</a>
+          <% } %>
+          <% for (let p = 1; p <= totalPages; p++) { %>
+            <a href="/admin/login-activity?<%= new URLSearchParams({ ...query, page: p }).toString() %>" class="px-3 py-1 border rounded <%= p === currentPage ? 'bg-purple-700 text-white font-bold' : 'hover:bg-gray-50' %>"><%= p %></a>
+          <% } %>
+          <% if (currentPage < totalPages) { %>
+            <a href="/admin/login-activity?<%= new URLSearchParams({ ...query, page: currentPage + 1 }).toString() %>" class="px-3 py-1 border rounded hover:bg-gray-50 font-bold">Next</a>
+          <% } %>
+        </div>
+      </div>
+    <% } %>
+
+  </div>
+</main>
+
+<%- include('../partials/footer') %>
+</body>
+</html>
