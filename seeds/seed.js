@@ -36,12 +36,12 @@ const seedDB = async () => {
     console.log('Creating demo users with distinct roles...');
     const salt = await bcrypt.genSalt(10);
     const adminPass = await bcrypt.hash('Admin@12345', salt);
-    const deliveryPass = await bcrypt.hash('Delivery@12345', salt);
+    const deliveryPass = await bcrypt.hash('Delivery@2026', salt);
     const customerPass = await bcrypt.hash('Customer@12345', salt);
 
     const admin = await User.create({
-      name: 'System Administrator',
-      email: 'admin@flipkart.com',
+      name: 'Shubham Kumar (Admin)',
+      email: 'shubhamrai9122@gmail.com',
       passwordHash: adminPass,
       role: 'admin',
       phone: '9876543210',
@@ -50,8 +50,8 @@ const seedDB = async () => {
     });
 
     const deliveryAgent = await User.create({
-      name: 'Ramesh (Logistics Partner)',
-      email: 'delivery@flipkart.com',
+      name: 'Shubham Logistics (Delivery Partner)',
+      email: 'shubham.logistics@gmail.com',
       passwordHash: deliveryPass,
       role: 'delivery',
       phone: '9876543211',
@@ -285,6 +285,7 @@ const seedDB = async () => {
       orderStatus: 'Out for Delivery',
       deliveryAgentId: deliveryAgent._id,
       deliveryNotes: 'Dispatched from Bangalore central sorting facility',
+      createdAt: new Date(Date.now() - 36 * 3600 * 1000),
       statusTimeline: [
         {
           status: 'Placed',
@@ -306,12 +307,112 @@ const seedDB = async () => {
         },
         {
           status: 'Out for Delivery',
-          message: 'Courier partner Ramesh is out for delivery.',
+          message: 'Courier partner is out for delivery.',
           timestamp: new Date(Date.now() - 2 * 3600 * 1000),
           updatedBy: deliveryAgent._id
         }
       ]
     });
+
+    // Additional realistic delivered orders across daily and weekly buckets for sales trend analytics
+    const pastOrders = [
+      {
+        orderNumber: 'OD9182736450',
+        prod: products[0], // iPhone 15 Pro Max
+        qty: 1,
+        daysAgo: 1,
+        status: 'Delivered',
+        payStatus: 'completed',
+        payMethod: 'Mock_UPI'
+      },
+      {
+        orderNumber: 'OD8273645192',
+        prod: products[1], // Samsung S24 Ultra
+        qty: 1,
+        daysAgo: 2,
+        status: 'Delivered',
+        payStatus: 'completed',
+        payMethod: 'Mock_Card'
+      },
+      {
+        orderNumber: 'OD7364519283',
+        prod: products[4], // Dell XPS 15
+        qty: 1,
+        daysAgo: 4,
+        status: 'Delivered',
+        payStatus: 'completed',
+        payMethod: 'Mock_UPI'
+      },
+      {
+        orderNumber: 'OD6451928374',
+        prod: products[2], // MacBook Air M3
+        qty: 1,
+        daysAgo: 8,
+        status: 'Delivered',
+        payStatus: 'completed',
+        payMethod: 'Mock_Card'
+      },
+      {
+        orderNumber: 'OD5192837465',
+        prod: products[3], // Sony Headphones
+        qty: 2,
+        daysAgo: 15,
+        status: 'Delivered',
+        payStatus: 'completed',
+        payMethod: 'COD'
+      },
+      {
+        orderNumber: 'OD4283746519',
+        prod: products[5], // Nike Air Force
+        qty: 1,
+        daysAgo: 22,
+        status: 'Delivered',
+        payStatus: 'completed',
+        payMethod: 'Mock_Card'
+      }
+    ];
+
+    for (const po of pastOrders) {
+      const pPrice = po.prod.discountPrice || po.prod.price;
+      const oDate = new Date(Date.now() - po.daysAgo * 24 * 3600 * 1000);
+      await Order.create({
+        userId: customer._id,
+        orderNumber: po.orderNumber,
+        items: [
+          {
+            productId: po.prod._id,
+            name: po.prod.name,
+            image: po.prod.images[0],
+            price: po.prod.price,
+            discountPrice: po.prod.discountPrice,
+            quantity: po.qty,
+            subtotal: pPrice * po.qty
+          }
+        ],
+        totals: {
+          subtotal: po.prod.price * po.qty,
+          shipping: 0,
+          discount: (po.prod.price - pPrice) * po.qty,
+          grandTotal: pPrice * po.qty
+        },
+        addressSnapshot: {
+          fullName: address.fullName,
+          phone: address.phone,
+          line1: address.line1,
+          line2: address.line2,
+          city: address.city,
+          state: address.state,
+          pincode: address.pincode,
+          country: address.country
+        },
+        paymentMethod: po.payMethod,
+        paymentStatus: po.payStatus,
+        orderStatus: po.status,
+        deliveryAgentId: deliveryAgent._id,
+        createdAt: oDate,
+        updatedAt: oDate
+      });
+    }
 
     console.log('Creating sample verified review...');
     await Review.create({

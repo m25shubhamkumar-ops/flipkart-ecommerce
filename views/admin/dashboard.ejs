@@ -57,6 +57,87 @@
 
     </div>
 
+    <!-- Sales Trends & Revenue Analytics (Daily / Weekly Stretch Goal) -->
+    <div class="bg-white p-5 rounded-sm shadow-sm border border-gray-200">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b pb-4 mb-4">
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-blue-50 text-blue-600">
+              <i class="fa-solid fa-chart-line text-sm"></i>
+            </span>
+            <div>
+              <h2 class="text-sm sm:text-base font-bold text-gray-900">Sales Trends & Revenue Velocity</h2>
+              <p class="text-xs text-gray-500">Live order volume and gross revenue trends across daily and weekly intervals</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Timeframe Controls & Summary -->
+        <div class="flex flex-wrap items-center gap-3">
+          <!-- Toggle Buttons -->
+          <div class="inline-flex rounded border border-gray-200 p-0.5 bg-gray-100 text-xs font-semibold" role="group">
+            <button type="button" id="btnDailyTrend" class="px-3 py-1.5 rounded text-xs font-bold transition bg-white text-blue-600 shadow-sm">
+              <i class="fa-regular fa-calendar-day mr-1"></i> Daily (7 Days)
+            </button>
+            <button type="button" id="btnWeeklyTrend" class="px-3 py-1.5 rounded text-xs font-bold transition text-gray-600 hover:text-gray-900">
+              <i class="fa-solid fa-calendar-week mr-1"></i> Weekly (4 Weeks)
+            </button>
+          </div>
+
+          <!-- Period Metrics Summary -->
+          <div class="hidden sm:flex items-center gap-2.5 pl-3 border-l border-gray-200 text-xs">
+            <div>
+              <span class="text-gray-500 block text-[10px] uppercase font-semibold">Period Total</span>
+              <span id="trendPeriodTotal" class="font-black text-emerald-600 text-xs sm:text-sm">
+                <%= formatPrice(salesTrend.daily.totalRevenue) %>
+              </span>
+            </div>
+            <div class="h-6 w-px bg-gray-200"></div>
+            <div>
+              <span class="text-gray-500 block text-[10px] uppercase font-semibold">Orders</span>
+              <span id="trendPeriodOrders" class="font-bold text-gray-900 text-xs sm:text-sm">
+                <%= salesTrend.daily.totalOrders %>
+              </span>
+            </div>
+            <div class="h-6 w-px bg-gray-200"></div>
+            <div>
+              <span class="text-gray-500 block text-[10px] uppercase font-semibold">AOV</span>
+              <span id="trendPeriodAov" class="font-bold text-blue-600 text-xs sm:text-sm">
+                <%= formatPrice(salesTrend.daily.aov) %>
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Chart Container -->
+      <div class="relative w-full h-72 sm:h-80">
+        <canvas id="salesTrendChart"></canvas>
+        <div id="chartFallbackContainer" class="hidden absolute inset-0 flex flex-col items-center justify-center bg-gray-50 p-4 text-center rounded border border-gray-200">
+          <i class="fa-solid fa-chart-simple text-3xl text-gray-400 mb-2"></i>
+          <p class="text-xs font-semibold text-gray-700">Interactive chart could not be initialized.</p>
+          <p class="text-[11px] text-gray-500 mt-1">Total revenue: <%= formatPrice(salesTrend.daily.totalRevenue) %> (<%= salesTrend.daily.totalOrders %> orders)</p>
+        </div>
+      </div>
+
+      <!-- Legend & Axis Indicators -->
+      <div class="flex flex-wrap items-center justify-between gap-2 pt-3 mt-3 border-t border-gray-100 text-[11px] text-gray-500">
+        <div class="flex items-center gap-4">
+          <div class="flex items-center gap-1.5">
+            <span class="w-3 h-1 bg-[#2874f0] rounded-full inline-block"></span>
+            <span class="font-medium text-gray-700">Gross Sales (₹)</span>
+          </div>
+          <div class="flex items-center gap-1.5">
+            <span class="w-3 h-3 bg-indigo-200 border border-indigo-500 rounded-sm inline-block"></span>
+            <span class="font-medium text-gray-700">Order Units</span>
+          </div>
+        </div>
+        <div class="text-[11px] text-gray-400 italic">
+          <i class="fa-solid fa-circle-info mr-1"></i> Excludes cancelled orders
+        </div>
+      </div>
+    </div>
+
     <!-- Quick Sections Grid -->
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
       
@@ -163,6 +244,210 @@
 
   </div>
 </main>
+
+<!-- Chart.js 4.x CDN -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+
+<!-- Embedded Sales Trend Data -->
+<script id="salesTrendDataScript" type="application/json">
+  <%- JSON.stringify(salesTrend) %>
+</script>
+
+<script>
+  (function() {
+    // Utility to format numbers as Indian Rupee currency
+    function formatINR(val) {
+      if (val === null || val === undefined || isNaN(val)) return '₹0';
+      return '₹' + Number(val).toLocaleString('en-IN');
+    }
+
+    const dataElement = document.getElementById('salesTrendDataScript');
+    let salesData = null;
+    try {
+      salesData = JSON.parse(dataElement.textContent || '{}');
+    } catch (e) {
+      console.error('Failed to parse salesTrend data', e);
+    }
+
+    if (!salesData || !salesData.daily || !salesData.weekly) {
+      console.warn('Sales trend data unavailable.');
+      return;
+    }
+
+    // Safety fallback if Chart.js is not loaded
+    if (typeof Chart === 'undefined') {
+      const fallback = document.getElementById('chartFallbackContainer');
+      const canvas = document.getElementById('salesTrendChart');
+      if (fallback && canvas) {
+        fallback.classList.remove('hidden');
+        canvas.classList.add('hidden');
+      }
+      return;
+    }
+
+    const ctx = document.getElementById('salesTrendChart').getContext('2d');
+    let currentMode = 'daily'; // 'daily' or 'weekly'
+
+    // Button and metric elements
+    const btnDaily = document.getElementById('btnDailyTrend');
+    const btnWeekly = document.getElementById('btnWeeklyTrend');
+    const metricPeriodTotal = document.getElementById('trendPeriodTotal');
+    const metricPeriodOrders = document.getElementById('trendPeriodOrders');
+    const metricPeriodAov = document.getElementById('trendPeriodAov');
+
+    // Chart.js Configuration
+    const trendChart = new Chart(ctx, {
+      data: {
+        labels: salesData.daily.labels,
+        datasets: [
+          {
+            type: 'line',
+            label: 'Gross Sales (₹)',
+            data: salesData.daily.revenue,
+            borderColor: '#2874f0',
+            backgroundColor: 'rgba(40, 116, 240, 0.12)',
+            borderWidth: 2.5,
+            fill: true,
+            tension: 0.35,
+            pointBackgroundColor: '#2874f0',
+            pointBorderColor: '#ffffff',
+            pointBorderWidth: 2,
+            pointRadius: 4,
+            pointHoverRadius: 6,
+            yAxisID: 'y'
+          },
+          {
+            type: 'bar',
+            label: 'Order Volume',
+            data: salesData.daily.orderCounts,
+            backgroundColor: 'rgba(99, 102, 241, 0.35)',
+            borderColor: '#6366f1',
+            borderWidth: 1.5,
+            borderRadius: 4,
+            maxBarThickness: 28,
+            yAxisID: 'y1'
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        interaction: {
+          mode: 'index',
+          intersect: false
+        },
+        plugins: {
+          legend: {
+            display: false // Using custom bottom legend
+          },
+          tooltip: {
+            backgroundColor: 'rgba(17, 24, 39, 0.95)',
+            titleFont: { size: 12, weight: 'bold' },
+            bodyFont: { size: 11 },
+            padding: 10,
+            cornerRadius: 6,
+            callbacks: {
+              label: function(context) {
+                if (context.datasetIndex === 0) {
+                  return ' Gross Sales: ' + formatINR(context.raw);
+                } else {
+                  return ' Orders Placed: ' + context.raw + ' units';
+                }
+              }
+            }
+          }
+        },
+        scales: {
+          x: {
+            grid: {
+              display: false
+            },
+            ticks: {
+              font: { size: 11, weight: '500' },
+              color: '#6b7280'
+            }
+          },
+          y: {
+            type: 'linear',
+            display: true,
+            position: 'left',
+            beginAtZero: true,
+            grid: {
+              color: 'rgba(0, 0, 0, 0.05)',
+              strokeDash: [3, 3]
+            },
+            ticks: {
+              font: { size: 10 },
+              color: '#6b7280',
+              callback: function(value) {
+                if (value >= 10000000) return '₹' + (value / 10000000).toFixed(1) + 'Cr';
+                if (value >= 100000) return '₹' + (value / 100000).toFixed(1) + 'L';
+                if (value >= 1000) return '₹' + (value / 1000).toFixed(0) + 'k';
+                return '₹' + value;
+              }
+            }
+          },
+          y1: {
+            type: 'linear',
+            display: true,
+            position: 'right',
+            beginAtZero: true,
+            grid: {
+              display: false
+            },
+            ticks: {
+              precision: 0,
+              font: { size: 10 },
+              color: '#818cf8',
+              callback: function(value) {
+                return value + ' ord';
+              }
+            }
+          }
+        }
+      }
+    });
+
+    // Update UI Function for Toggling
+    function setTrendMode(mode) {
+      currentMode = mode;
+      const data = mode === 'daily' ? salesData.daily : salesData.weekly;
+
+      // Update button styling
+      if (mode === 'daily') {
+        btnDaily.className = 'px-3 py-1.5 rounded text-xs font-bold transition bg-white text-blue-600 shadow-sm';
+        btnWeekly.className = 'px-3 py-1.5 rounded text-xs font-bold transition text-gray-600 hover:text-gray-900';
+      } else {
+        btnWeekly.className = 'px-3 py-1.5 rounded text-xs font-bold transition bg-white text-blue-600 shadow-sm';
+        btnDaily.className = 'px-3 py-1.5 rounded text-xs font-bold transition text-gray-600 hover:text-gray-900';
+      }
+
+      // Update Chart.js data
+      trendChart.data.labels = data.labels;
+      trendChart.data.datasets[0].data = data.revenue;
+      trendChart.data.datasets[1].data = data.orderCounts;
+      trendChart.update();
+
+      // Update Header Metrics
+      if (metricPeriodTotal) metricPeriodTotal.textContent = formatINR(data.totalRevenue);
+      if (metricPeriodOrders) metricPeriodOrders.textContent = data.totalOrders;
+      if (metricPeriodAov) metricPeriodAov.textContent = formatINR(data.aov);
+    }
+
+    // Attach listeners
+    if (btnDaily) {
+      btnDaily.addEventListener('click', function() {
+        if (currentMode !== 'daily') setTrendMode('daily');
+      });
+    }
+
+    if (btnWeekly) {
+      btnWeekly.addEventListener('click', function() {
+        if (currentMode !== 'weekly') setTrendMode('weekly');
+      });
+    }
+  })();
+</script>
 
 <%- include('../partials/footer') %>
 </body>

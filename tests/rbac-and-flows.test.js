@@ -133,6 +133,34 @@ const runTests = async () => {
     assert.ok(auditCount > 0, 'Audit logs should exist in MongoDB');
     console.log(`  ✅ Successfully verified ${auditCount} LoginActivity audit trail records in MongoDB\n`);
 
+    // 8. Sales Trends Analytics (Stretch Goal)
+    console.log('Test 7: Sales Trends Analytics (Daily/Weekly) Verification');
+    // Admin accesses /admin/dashboard - verify sales trend chart elements rendered
+    assert.ok(adminDashRes.body.includes('salesTrendChart'), 'Admin dashboard should contain salesTrendChart canvas');
+    assert.ok(adminDashRes.body.includes('btnDailyTrend'), 'Admin dashboard should contain btnDailyTrend button');
+    assert.ok(adminDashRes.body.includes('btnWeeklyTrend'), 'Admin dashboard should contain btnWeeklyTrend button');
+
+    // Admin accesses /admin/api/sales-trends
+    const adminSalesApiRes = await request('/admin/api/sales-trends', {
+      headers: { Cookie: `token=${adminToken}` }
+    });
+    assert.strictEqual(adminSalesApiRes.statusCode, 200, 'Admin should access /admin/api/sales-trends');
+    const salesApiData = JSON.parse(adminSalesApiRes.body);
+    assert.strictEqual(salesApiData.success, true);
+    assert.strictEqual(salesApiData.data.daily.labels.length, 7, 'Daily trends must have 7 days');
+    assert.strictEqual(salesApiData.data.weekly.labels.length, 4, 'Weekly trends must have 4 weeks');
+
+    // Customer blocked from /admin/api/sales-trends
+    const custSalesApiRes = await request('/admin/api/sales-trends', {
+      headers: { Cookie: `token=${customerToken}` }
+    });
+    assert.strictEqual(custSalesApiRes.statusCode, 403, 'Customer MUST receive 403 when accessing sales trends API');
+
+    // Guest redirected to /login
+    const guestSalesApiRes = await request('/admin/api/sales-trends');
+    assert.strictEqual(guestSalesApiRes.statusCode, 302, 'Guest should be redirected to /login');
+    console.log('  ✅ Sales trends chart rendered, API endpoint returns daily/weekly breakdown, and strictly protected by RBAC\n');
+
     console.log('====================================================');
     console.log('🎉 ALL AUTOMATED RBAC AND SECURITY TESTS PASSED!');
     console.log('====================================================\n');

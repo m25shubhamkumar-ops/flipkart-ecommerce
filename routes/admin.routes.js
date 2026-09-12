@@ -9,6 +9,7 @@ router.use('/admin', requireAuth, requireAdmin);
 
 router.get('/admin', (req, res) => res.redirect('/admin/dashboard'));
 router.get('/admin/dashboard', adminController.getDashboard);
+router.get('/admin/api/sales-trends', adminController.getSalesTrendsApi);
 
 // Products CRUD
 router.get('/admin/products', adminController.getProducts);

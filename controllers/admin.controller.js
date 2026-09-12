@@ -32,6 +32,13 @@ exports.getDashboard = async (req, res, next) => {
     // Critical low stock items
     const lowStockList = await Product.find({ stock: { $lte: 5 } }).limit(5).lean();
 
+    // Sales Trends Calculation (Daily / Weekly Stretch Goal)
+    const nonCancelledOrders = await Order.find(
+      { orderStatus: { $ne: 'Cancelled' } },
+      'totals.grandTotal orderStatus createdAt'
+    ).lean();
+    const salesTrend = getSalesTrends(nonCancelledOrders);
+
     res.render('admin/dashboard', {
       title: 'Admin Control Center - Flipkart',
       stats: {
@@ -42,6 +49,7 @@ exports.getDashboard = async (req, res, next) => {
         lowStockProducts,
         totalRevenue
       },
+      salesTrend,
       recentOrders,
       lowStockList,
       formatPrice,
@@ -574,3 +582,94 @@ exports.getLoginActivity = async (req, res, next) => {
     next(error);
   }
 };
+
+// Helper function for Sales Trends Calculation (Daily & Weekly)
+function getSalesTrends(orders, referenceDate = new Date()) {
+  // 1. Daily Trend (Last 7 Days)
+  const daily = {
+    labels: [],
+    revenue: [],
+    orderCounts: [],
+    totalRevenue: 0,
+    totalOrders: 0,
+    aov: 0
+  };
+
+  for (let i = 6; i >= 0; i--) {
+    const startOfDay = new Date(referenceDate);
+    startOfDay.setDate(startOfDay.getDate() - i);
+    startOfDay.setHours(0, 0, 0, 0);
+
+    const endOfDay = new Date(startOfDay);
+    endOfDay.setDate(endOfDay.getDate() + 1);
+
+    const label = startOfDay.toLocaleDateString('en-IN', { day: '2-digit', month: 'short' });
+    daily.labels.push(label);
+
+    const dayOrders = orders.filter(o => {
+      const orderDate = new Date(o.createdAt);
+      return orderDate >= startOfDay && orderDate < endOfDay && o.orderStatus !== 'Cancelled';
+    });
+
+    const rev = dayOrders.reduce((sum, o) => sum + (o.totals?.grandTotal || 0), 0);
+    daily.revenue.push(rev);
+    daily.orderCounts.push(dayOrders.length);
+    daily.totalRevenue += rev;
+    daily.totalOrders += dayOrders.length;
+  }
+  daily.aov = daily.totalOrders > 0 ? Math.round(daily.totalRevenue / daily.totalOrders) : 0;
+
+  // 2. Weekly Trend (Last 4 Weeks)
+  const weekly = {
+    labels: [],
+    revenue: [],
+    orderCounts: [],
+    totalRevenue: 0,
+    totalOrders: 0,
+    aov: 0
+  };
+
+  for (let w = 3; w >= 0; w--) {
+    const startOfWeek = new Date(referenceDate);
+    startOfWeek.setDate(startOfWeek.getDate() - ((w + 1) * 7 - 1));
+    startOfWeek.setHours(0, 0, 0, 0);
+
+    const endOfWeek = new Date(startOfWeek);
+    endOfWeek.setDate(endOfWeek.getDate() + 7);
+
+    const startLabel = startOfWeek.toLocaleDateString('en-IN', { day: '2-digit', month: 'short' });
+    const endLabel = new Date(endOfWeek.getTime() - 1).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' });
+    weekly.labels.push(`${startLabel} - ${endLabel}`);
+
+    const weekOrders = orders.filter(o => {
+      const orderDate = new Date(o.createdAt);
+      return orderDate >= startOfWeek && orderDate < endOfWeek && o.orderStatus !== 'Cancelled';
+    });
+
+    const rev = weekOrders.reduce((sum, o) => sum + (o.totals?.grandTotal || 0), 0);
+    weekly.revenue.push(rev);
+    weekly.orderCounts.push(weekOrders.length);
+    weekly.totalRevenue += rev;
+    weekly.totalOrders += weekOrders.length;
+  }
+  weekly.aov = weekly.totalOrders > 0 ? Math.round(weekly.totalRevenue / weekly.totalOrders) : 0;
+
+  return { daily, weekly };
+}
+
+exports.getSalesTrends = getSalesTrends;
+
+// REST API for dynamic sales trends querying
+exports.getSalesTrendsApi = async (req, res, next) => {
+  try {
+    const orders = await Order.find(
+      { orderStatus: { $ne: 'Cancelled' } },
+      'totals.grandTotal orderStatus createdAt'
+    ).lean();
+    const salesTrend = getSalesTrends(orders);
+    res.json({ success: true, data: salesTrend });
+  } catch (error) {
+    next(error);
+  }
+};
+

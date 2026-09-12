@@ -431,6 +431,14 @@ Unlike basic e-commerce apps that only offer a simple "Returned" toggle, this pl
 5. **Login Audit Trail**:
    - Located at `/admin/login-activity`. Comprehensive chronological log of all login attempts with IP addresses, device breakdown, browser details, and failure reasons.
 
+6. **Sales Trends & Revenue Velocity Analytics (Daily & Weekly)**:
+   - **Continuous Calendar Bucketing**: Solves the classic sparse-data issue in e-commerce analytics where days with zero orders would otherwise produce missing axes or jagged line jumps. The backend `getSalesTrends` engine initializes every single day (Last 7 Days) and week (Last 4 Weeks) with zero defaults before aggregating matched orders.
+   - **Dual-Axis Chart.js Visualization**: Renders an interactive dual-axis chart in `/admin/dashboard`:
+     - **Left Y-Axis (Revenue Line)**: Plotted with a smooth cubic tension curve, subtle blue gradient fill, and dynamic Indian currency formatting (₹, ₹k, ₹L, ₹Cr).
+     - **Right Y-Axis (Order Volume Bars)**: Plotted with discrete bar columns indicating number of orders placed in that time bucket.
+   - **Interactive Timeframe Toggling**: Administrators can switch seamlessly between **Daily (7 Days)** and **Weekly (4 Weeks)** without page reloads. The chart and top period badges (Period Total, Total Orders, Average Order Value - AOV) recalculate and animate smoothly.
+   - **Dedicated Analytics API (`GET /admin/api/sales-trends`)**: Programmatic REST endpoint returning structured JSON payloads for dashboard consumers or third-party business intelligence integrations, strictly secured under `requireAuth` and `requireAdmin`.
+
 ---
 
 ## 5. Database Schemas & Data Model Architecture
@@ -595,7 +603,8 @@ flipkart-ecommerce/
 | **GET** | `/delivery/dashboard` | `requireAuth`, `requireRole("delivery")` | Courier portal with Deliveries & Pickups |
 | **GET** | `/delivery/orders/:id`| `requireAuth`, `requireRole("delivery")` | Order details, Maps GPS link, COD collection |
 | **POST** | `/delivery/orders/:id/status` | `requireAuth`, `requireRole("delivery")` | Updates delivery stage or return pickup |
-| **GET** | `/admin/dashboard` | `requireAuth`, `requireRole("admin")` | Executive KPI dashboard |
+| **GET** | `/admin/dashboard` | `requireAuth`, `requireRole("admin")` | Executive KPI dashboard & Sales Trends Chart |
+| **GET** | `/admin/api/sales-trends` | `requireAuth`, `requireRole("admin")` | REST API for daily and weekly sales trends |
 | **GET** | `/admin/orders` | `requireAuth`, `requireRole("admin")` | Master order queue & logistics assignment |
 | **GET** | `/admin/returns` | `requireAuth`, `requireRole("admin")` | Master return & reverse logistics queue |
 | **POST** | `/admin/returns/:id/status` | `requireAuth`, `requireRole("admin")` | Transitions return stages (Confirm, Refund) |

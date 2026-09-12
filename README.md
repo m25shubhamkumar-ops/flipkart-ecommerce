@@ -194,6 +194,8 @@ npm test
 
 9. **Admin Control Center (`/admin`)**
    - Executive KPI metrics: Total revenue, total orders, customers count, delivery agents count, and low stock warnings.
+   - **Sales Trend & Revenue Velocity Analytics**: Interactive dual-axis Chart.js visualization displaying daily (7-day) and weekly (4-week) gross revenue lines, order volume bars, and dynamic AOV (Average Order Value). Includes instant timeframe switching without page reload.
+   - **Programmatic Sales Trends API (`GET /admin/api/sales-trends`)**: REST endpoint delivering structured time-bucketed analytics.
    - Product CRUD (Create, Read, Update, Delete) with image URLs and inventory tracking.
    - Master order queue with the ability to assign orders to delivery agents.
    - Master return & reverse logistics resolution queue.
