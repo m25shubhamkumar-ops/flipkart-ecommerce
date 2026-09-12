@@ -49,6 +49,8 @@ This is a complete, full-stack e-commerce marketplace called **My Local Shop**. 
    Passwords hashed with **bcrypt**, sessions managed via stateless **JWT in HTTP-only secure cookies** (immune to client-side XSS attacks), and all public demo login links removed so portals are strictly private.
 6. **🎨 Modern 3D Tactile UI & Rich Color Palette**:  
    Tactile 3D press-down buttons, floating elevation cards with hover lift, 3D category orbs with ambient glows, recessed image pedestals, and a rich palette (Electric Indigo, Midnight Navy, Radiant Amber, and Emerald Green).
+7. **⚡ 10-Minute Express Delivery (Quick Commerce)**:  
+   Customers can choose 10-Minute Express Delivery at checkout for an extra ₹29 fee. Order tracking shows a live 10-minute countdown banner and alerts delivery partners with pulsing priority badges for immediate doorstep dispatch.
 
 ---
 
