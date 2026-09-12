@@ -27,7 +27,7 @@ exports.getDashboard = async (req, res, next) => {
       .lean();
 
     res.render('delivery/dashboard', {
-      title: 'Delivery Partner Portal - Flipkart Logistics',
+      title: 'Delivery Partner Portal - My Local Shop Logistics',
       stats: { totalAssigned, activeDeliveries, completedToday },
       shipments: pendingShipments,
       formatPrice,
@@ -62,7 +62,7 @@ exports.getOrders = async (req, res, next) => {
       .lean();
 
     res.render('delivery/orders', {
-      title: 'Assigned Shipments - Flipkart Delivery Partner',
+      title: 'Assigned Shipments - My Local Shop Delivery Partner',
       orders,
       currentFilter: status || 'all',
       formatPrice,
@@ -183,7 +183,7 @@ exports.getHistory = async (req, res, next) => {
       .lean();
 
     res.render('delivery/history', {
-      title: 'Delivery History - Flipkart Logistics',
+      title: 'Delivery History - My Local Shop Logistics',
       orders,
       formatPrice,
       formatDate

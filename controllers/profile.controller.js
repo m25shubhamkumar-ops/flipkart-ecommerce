@@ -10,7 +10,7 @@ exports.getProfile = async (req, res, next) => {
     const addressCount = await Address.countDocuments({ userId: req.user._id });
 
     res.render('profile/index', {
-      title: 'My Profile - Flipkart',
+      title: 'My Profile - My Local Shop',
       user,
       orderCount,
       addressCount,
@@ -43,7 +43,7 @@ exports.postChangePassword = async (req, res, next) => {
     const isMatch = await bcrypt.compare(currentPassword, user.passwordHash);
     if (!isMatch) {
       return res.render('profile/index', {
-        title: 'My Profile - Flipkart',
+        title: 'My Profile - My Local Shop',
         user,
         orderCount: 0,
         addressCount: 0,
@@ -54,7 +54,7 @@ exports.postChangePassword = async (req, res, next) => {
 
     if (newPassword !== confirmNewPassword) {
       return res.render('profile/index', {
-        title: 'My Profile - Flipkart',
+        title: 'My Profile - My Local Shop',
         user,
         orderCount: 0,
         addressCount: 0,
@@ -65,7 +65,7 @@ exports.postChangePassword = async (req, res, next) => {
 
     if (newPassword.length < 6) {
       return res.render('profile/index', {
-        title: 'My Profile - Flipkart',
+        title: 'My Profile - My Local Shop',
         user,
         orderCount: 0,
         addressCount: 0,
@@ -79,7 +79,7 @@ exports.postChangePassword = async (req, res, next) => {
     await user.save();
 
     res.render('profile/index', {
-      title: 'My Profile - Flipkart',
+      title: 'My Profile - My Local Shop',
       user,
       orderCount: 0,
       addressCount: 0,

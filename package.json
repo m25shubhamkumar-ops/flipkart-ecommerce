@@ -1,7 +1,7 @@
 {
   "name": "flipkart-ecommerce",
   "version": "1.0.0",
-  "description": "Full-stack Flipkart-style e-commerce platform with Customer, Delivery Agent, and Admin roles",
+  "description": "Full-stack My Local Shop e-commerce platform with 3D UI, Customer, Delivery Agent, and Admin roles",
   "main": "app.js",
   "scripts": {
     "start": "node app.js",
@@ -17,7 +17,8 @@
     "jwt",
     "otp",
     "audit-log",
-    "flipkart"
+    "my-local-shop",
+    "3d-ui"
   ],
   "author": "Antigravity Engineering",
   "license": "ISC",

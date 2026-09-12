@@ -43,7 +43,7 @@ const mergeGuestCart = async (req, res, userId) => {
 exports.getRegister = (req, res) => {
   if (req.user) return res.redirect('/');
   res.render('auth/register', {
-    title: 'Register - Flipkart',
+    title: 'Register - My Local Shop',
     error: null,
     notice: req.query.notice || null,
     formData: {
@@ -64,7 +64,7 @@ exports.postRegister = async (req, res) => {
 
     if (!name || !cleanEmail || !password || !cleanPhone) {
       return res.render('auth/register', {
-        title: 'Register - Flipkart',
+        title: 'Register - My Local Shop',
         error: 'Please fill in all required fields including your 10-digit mobile number.',
         notice: null,
         formData: req.body,
@@ -74,7 +74,7 @@ exports.postRegister = async (req, res) => {
 
     if (!/^\d{10}$/.test(cleanPhone)) {
       return res.render('auth/register', {
-        title: 'Register - Flipkart',
+        title: 'Register - My Local Shop',
         error: 'Mobile number must be exactly 10 digits.',
         notice: null,
         formData: req.body,
@@ -84,7 +84,7 @@ exports.postRegister = async (req, res) => {
 
     if (password !== confirmPassword) {
       return res.render('auth/register', {
-        title: 'Register - Flipkart',
+        title: 'Register - My Local Shop',
         error: 'Passwords do not match.',
         notice: null,
         formData: req.body,
@@ -94,7 +94,7 @@ exports.postRegister = async (req, res) => {
 
     if (password.length < 6) {
       return res.render('auth/register', {
-        title: 'Register - Flipkart',
+        title: 'Register - My Local Shop',
         error: 'Password must be at least 6 characters long.',
         notice: null,
         formData: req.body,
@@ -105,7 +105,7 @@ exports.postRegister = async (req, res) => {
     const existingUser = await User.findOne({ email: cleanEmail });
     if (existingUser) {
       return res.render('auth/register', {
-        title: 'Register - Flipkart',
+        title: 'Register - My Local Shop',
         error: 'An account with this email already exists.',
         notice: null,
         formData: req.body,
@@ -137,7 +137,7 @@ exports.postRegister = async (req, res) => {
   } catch (error) {
     console.error('Registration error:', error);
     res.render('auth/register', {
-      title: 'Register - Flipkart',
+      title: 'Register - My Local Shop',
       error: error.message || 'An error occurred during registration. Please try again.',
       notice: null,
       formData: req.body,
@@ -152,7 +152,7 @@ exports.getVerifyOtp = (req, res) => {
   if (!email) return res.redirect('/register');
 
   res.render('auth/verify-otp', {
-    title: 'Verify OTP - Flipkart',
+    title: 'Verify OTP - My Local Shop',
     email,
     role: role || 'customer',
     redirect: redirect || '',
@@ -170,7 +170,7 @@ exports.postVerifyOtp = async (req, res) => {
     const result = await verifySubmittedOTP(cleanEmail, otp, 'registration');
     if (!result.valid) {
       return res.render('auth/verify-otp', {
-        title: 'Verify OTP - Flipkart',
+        title: 'Verify OTP - My Local Shop',
         email: cleanEmail,
         role: req.body.role || 'customer',
         redirect: redirect || '',
@@ -217,7 +217,7 @@ exports.postVerifyOtp = async (req, res) => {
   } catch (error) {
     console.error('OTP verify error:', error);
     res.render('auth/verify-otp', {
-      title: 'Verify OTP - Flipkart',
+      title: 'Verify OTP - My Local Shop',
       email: cleanEmail,
       role: 'customer',
       redirect: redirect || '',
@@ -251,7 +251,7 @@ exports.getLogin = (req, res) => {
   }
 
   res.render('auth/login', {
-    title: 'Login - Flipkart',
+    title: 'Login - My Local Shop',
     error: null,
     email: req.query.email || '',
     success: req.query.registered ? 'Registration successful! Please log in.' : null,
@@ -267,7 +267,7 @@ exports.postLogin = async (req, res) => {
   try {
     if (!cleanEmail) {
       return res.render('auth/login', {
-        title: 'Login - Flipkart',
+        title: 'Login - My Local Shop',
         error: 'Please enter your email address.',
         email: '',
         success: null,
@@ -295,7 +295,7 @@ exports.postLogin = async (req, res) => {
         failureReason: 'Account suspended'
       });
       return res.render('auth/login', {
-        title: 'Login - Flipkart',
+        title: 'Login - My Local Shop',
         error: 'This account has been deactivated. Please contact support.',
         email: cleanEmail,
         success: null,
@@ -312,7 +312,7 @@ exports.postLogin = async (req, res) => {
         failureReason: 'Incorrect password'
       });
       return res.render('auth/login', {
-        title: 'Login - Flipkart',
+        title: 'Login - My Local Shop',
         error: 'Invalid email or password.',
         email: cleanEmail,
         success: null,
@@ -351,7 +351,7 @@ exports.postLogin = async (req, res) => {
   } catch (error) {
     console.error('Login error:', error);
     res.render('auth/login', {
-      title: 'Login - Flipkart',
+      title: 'Login - My Local Shop',
       error: 'An unexpected error occurred during login. Please try again.',
       email: cleanEmail,
       success: null,
@@ -376,7 +376,7 @@ exports.getLogout = async (req, res) => {
 // Forgot Password Views and Actions
 exports.getForgotPassword = (req, res) => {
   res.render('auth/forgot-password', {
-    title: 'Forgot Password - Flipkart',
+    title: 'Forgot Password - My Local Shop',
     error: null,
     success: null
   });
@@ -390,7 +390,7 @@ exports.postForgotPassword = async (req, res) => {
     const user = await User.findOne({ email: cleanEmail });
     if (!user) {
       return res.render('auth/forgot-password', {
-        title: 'Forgot Password - Flipkart',
+        title: 'Forgot Password - My Local Shop',
         error: 'No account registered with that email address.',
         success: null
       });
@@ -403,7 +403,7 @@ exports.postForgotPassword = async (req, res) => {
   } catch (error) {
     console.error('Forgot password error:', error);
     res.render('auth/forgot-password', {
-      title: 'Forgot Password - Flipkart',
+      title: 'Forgot Password - My Local Shop',
       error: 'Failed to process password reset. Please try again.',
       success: null
     });
@@ -414,7 +414,7 @@ exports.getResetPassword = (req, res) => {
   const { email } = req.query;
   if (!email) return res.redirect('/forgot-password');
   res.render('auth/reset-password', {
-    title: 'Reset Password - Flipkart',
+    title: 'Reset Password - My Local Shop',
     email,
     error: null
   });
@@ -427,7 +427,7 @@ exports.postResetPassword = async (req, res) => {
   try {
     if (password !== confirmPassword) {
       return res.render('auth/reset-password', {
-        title: 'Reset Password - Flipkart',
+        title: 'Reset Password - My Local Shop',
         email: cleanEmail,
         error: 'Passwords do not match.'
       });
@@ -435,7 +435,7 @@ exports.postResetPassword = async (req, res) => {
 
     if (password.length < 6) {
       return res.render('auth/reset-password', {
-        title: 'Reset Password - Flipkart',
+        title: 'Reset Password - My Local Shop',
         email: cleanEmail,
         error: 'Password must be at least 6 characters.'
       });
@@ -444,7 +444,7 @@ exports.postResetPassword = async (req, res) => {
     const result = await verifySubmittedOTP(cleanEmail, otp, 'password_reset');
     if (!result.valid) {
       return res.render('auth/reset-password', {
-        title: 'Reset Password - Flipkart',
+        title: 'Reset Password - My Local Shop',
         email: cleanEmail,
         error: result.message
       });
@@ -456,7 +456,7 @@ exports.postResetPassword = async (req, res) => {
     await User.findOneAndUpdate({ email: cleanEmail }, { passwordHash });
 
     res.render('auth/login', {
-      title: 'Login - Flipkart',
+      title: 'Login - My Local Shop',
       success: 'Password reset successful! You may now sign in.',
       error: null,
       redirect: ''
@@ -464,7 +464,7 @@ exports.postResetPassword = async (req, res) => {
   } catch (error) {
     console.error('Password reset error:', error);
     res.render('auth/reset-password', {
-      title: 'Reset Password - Flipkart',
+      title: 'Reset Password - My Local Shop',
       email: cleanEmail,
       error: 'Failed to reset password. Please try again.'
     });

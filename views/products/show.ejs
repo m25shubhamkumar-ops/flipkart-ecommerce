@@ -18,13 +18,13 @@
     </div>
 
     <!-- Product Card Container -->
-    <div class="bg-white rounded-sm shadow-sm border border-gray-200 p-6 grid grid-cols-1 lg:grid-cols-12 gap-8">
+    <div class="bg-white rounded-2xl shadow-md border border-slate-200/80 p-6 sm:p-8 grid grid-cols-1 lg:grid-cols-12 gap-8">
       
       <!-- Left Column: Images and CTA Buttons (5 cols) -->
       <div class="lg:col-span-5 flex flex-col items-center">
         
-        <!-- Main Image -->
-        <div class="w-full h-80 sm:h-96 flex items-center justify-center p-4 border border-gray-100 rounded-sm mb-4">
+        <!-- Main Image Pedestal -->
+        <div class="w-full h-80 sm:h-96 flex items-center justify-center p-6 bg-gradient-to-b from-slate-50 to-slate-100/70 border border-slate-200/60 rounded-2xl mb-4 shadow-inner">
           <img id="mainImage" 
                src="<%= product.images && product.images[0] ? product.images[0] : 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=600' %>" 
                alt="<%= product.name %>" 
@@ -35,7 +35,7 @@
         <% if (product.images && product.images.length > 1) { %>
           <div class="flex items-center gap-2 mb-6">
             <% product.images.forEach((img, idx) => { %>
-              <button onclick="document.getElementById('mainImage').src='<%= img %>'" class="w-14 h-14 border border-gray-200 hover:border-blue-500 p-1 rounded overflow-hidden focus:ring-2 focus:ring-blue-400">
+              <button onclick="document.getElementById('mainImage').src='<%= img %>'" class="w-14 h-14 border-2 border-slate-200 hover:border-indigo-500 p-1 rounded-xl overflow-hidden focus:ring-2 focus:ring-indigo-400 transition shadow-xs">
                 <img src="<%= img %>" alt="Thumbnail" class="w-full h-full object-contain">
               </button>
             <% }) %>
@@ -50,9 +50,9 @@
               id="addToCartBtn"
               data-in-cart="true"
               onclick="window.location.href='/cart'"
-              class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 px-4 rounded-sm text-sm uppercase tracking-wider shadow flex items-center justify-center gap-2 transition-colors"
+              class="btn-3d-primary flex-1 py-3 px-4 text-xs sm:text-sm uppercase tracking-wider"
             >
-              <i class="fa-solid fa-check"></i> Go to Cart
+              <i class="fa-solid fa-check mr-1.5"></i> Go to Cart
             </button>
           <% } else { %>
             <button 
@@ -61,33 +61,32 @@
               data-in-cart="false"
               onclick="handleAddToCart('<%= product._id %>', this)"
               <%= product.stock <= 0 ? 'disabled' : '' %> 
-              class="flex-1 bg-[#ff9f00] hover:bg-[#f39700] text-white font-bold py-3 px-4 rounded-sm text-sm uppercase tracking-wider shadow flex items-center justify-center gap-2 disabled:opacity-50 transition-colors"
+              class="btn-3d-amber flex-1 py-3 px-4 text-xs sm:text-sm uppercase tracking-wider disabled:opacity-50"
             >
-              <i class="fa-solid fa-cart-shopping"></i> Add to Cart
+              <i class="fa-solid fa-cart-shopping mr-1.5"></i> Add to Cart
             </button>
           <% } %>
 
           <form action="/cart/add" method="POST" class="flex-1">
             <input type="hidden" name="productId" value="<%= product._id %>">
             <input type="hidden" name="buyNow" value="true">
-            <button type="submit" <%= product.stock <= 0 ? 'disabled' : '' %> class="w-full bg-[#fb641b] hover:bg-[#ea550d] text-white font-bold py-3 px-4 rounded-sm text-sm uppercase tracking-wider shadow flex items-center justify-center gap-2 disabled:opacity-50">
+            <button type="submit" <%= product.stock <= 0 ? 'disabled' : '' %> class="w-full bg-gradient-to-r from-orange-500 to-amber-600 hover:from-orange-400 hover:to-amber-500 border-b-4 border-orange-800 active:border-b-0 active:translate-y-1 text-white font-black py-3 px-4 rounded-lg text-xs sm:text-sm uppercase tracking-wider shadow-md disabled:opacity-50 transition-all flex items-center justify-center gap-1.5">
               <i class="fa-solid fa-bolt"></i> Buy Now
             </button>
           </form>
         </div>
 
         <!-- Inline Toast Alert Container -->
-        <div id="cartToast" class="hidden w-full mt-2 p-2.5 bg-emerald-50 border border-emerald-300 rounded text-emerald-800 text-xs font-semibold text-center flex items-center justify-center gap-2">
+        <div id="cartToast" class="hidden w-full mt-2 p-2.5 bg-emerald-50 border border-emerald-300 rounded-lg text-emerald-800 text-xs font-semibold text-center flex items-center justify-center gap-2">
           <i class="fa-solid fa-circle-check text-emerald-600"></i>
           <span id="cartToastMsg">Item added to cart! It will stay until you remove it.</span>
         </div>
-
 
         <!-- Wishlist toggle -->
         <div class="w-full mt-3 text-center">
           <form action="/wishlist/toggle" method="POST">
             <input type="hidden" name="productId" value="<%= product._id %>">
-            <button type="submit" class="text-xs font-semibold text-gray-600 hover:text-red-500 inline-flex items-center gap-1.5">
+            <button type="submit" class="text-xs font-semibold text-slate-500 hover:text-red-500 inline-flex items-center gap-1.5 transition">
               <i class="<%= inWishlist ? 'fa-solid fa-heart text-red-500' : 'fa-regular fa-heart' %>"></i>
               <%= inWishlist ? 'Remove from Wishlist' : 'Add to Wishlist' %>
             </button>
@@ -100,20 +99,22 @@
       <div class="lg:col-span-7 space-y-4">
         
         <div>
-          <span class="text-xs font-bold text-gray-400 uppercase tracking-widest"><%= product.brand %></span>
-          <h1 class="text-xl sm:text-2xl font-bold text-gray-900 mt-1">
+          <span class="text-xs font-bold text-slate-400 uppercase tracking-widest"><%= product.brand %></span>
+          <h1 class="text-xl sm:text-2xl font-black text-slate-900 mt-1">
             <%= product.name %>
           </h1>
         </div>
 
         <!-- Rating & Assured Badge -->
         <div class="flex items-center gap-3">
-          <div class="flex items-center gap-1 bg-[#388e3c] text-white text-xs font-bold px-2 py-0.5 rounded">
+          <div class="flex items-center gap-1 bg-emerald-600 text-white text-xs font-black px-2 py-0.5 rounded shadow-xs">
             <span><%= product.ratingAvg || 4.2 %></span>
             <i class="fa-solid fa-star text-[10px]"></i>
           </div>
-          <span class="text-xs text-gray-500 font-medium"><%= product.ratingCount || 34 %> Ratings & Reviews</span>
-          <img src="https://static-assets-web.flixcart.com/fk-p-linchpin-web/fk-cp-zion/img/fa_62673a.png" alt="Flipkart Assured" class="h-5 object-contain">
+          <span class="text-xs text-slate-500 font-medium"><%= product.ratingCount || 34 %> Verified Reviews</span>
+          <span class="inline-flex items-center gap-1 bg-indigo-50 text-indigo-700 font-extrabold text-xs px-2.5 py-0.5 rounded-full border border-indigo-200">
+            <i class="fa-solid fa-shield-check text-indigo-500"></i> Local Assured
+          </span>
         </div>
 
         <!-- Price Section -->
@@ -156,7 +157,7 @@
           <h3 class="font-bold text-gray-800 uppercase tracking-wide text-[11px]">Available Offers</h3>
           <p class="text-gray-700 flex items-start gap-2">
             <i class="fa-solid fa-tag text-emerald-600 mt-0.5"></i>
-            <span><strong>Bank Offer:</strong> 5% Unlimited Cashback on Flipkart Axis Bank Card</span>
+            <span><strong>Bank Offer:</strong> 5% Unlimited Cashback on Local Shop Co-Brand Cards</span>
           </p>
           <p class="text-gray-700 flex items-start gap-2">
             <i class="fa-solid fa-tag text-emerald-600 mt-0.5"></i>
@@ -164,7 +165,7 @@
           </p>
           <p class="text-gray-700 flex items-start gap-2">
             <i class="fa-solid fa-tag text-emerald-600 mt-0.5"></i>
-            <span><strong>Partner Offer:</strong> Sign up for Flipkart Pay Later & get free shipping</span>
+            <span><strong>Partner Offer:</strong> Sign up for Local Shop Pay Later & get free neighborhood shipping</span>
           </p>
         </div>
 

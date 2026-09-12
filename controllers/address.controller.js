@@ -4,7 +4,7 @@ exports.getAddresses = async (req, res, next) => {
   try {
     const addresses = await Address.find({ userId: req.user._id }).sort({ isDefault: -1, createdAt: -1 });
     res.render('profile/addresses', {
-      title: 'Manage Addresses - Flipkart',
+      title: 'Manage Addresses - My Local Shop',
       addresses,
       error: req.query.error || null,
       success: req.query.success || null

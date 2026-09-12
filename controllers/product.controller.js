@@ -25,7 +25,7 @@ exports.getHome = async (req, res, next) => {
       .lean();
 
     res.render('home', {
-      title: 'Flipkart Online Shopping Site - Electronics, Mobiles, Fashion & More',
+      title: 'My Local Shop - Neighborhood Store - Electronics, Mobiles, Fashion & More',
       categories,
       dealProducts,
       featuredProducts,
@@ -94,7 +94,7 @@ exports.getProducts = async (req, res, next) => {
     const brands = await Product.distinct('brand', { isActive: true });
 
     res.render('products/index', {
-      title: search ? `Results for "${search}" - Flipkart` : 'Explore Products - Flipkart',
+      title: search ? `Results for "${search}" - My Local Shop` : 'Explore Products - My Local Shop',
       products,
       allCategories,
       brands,
@@ -120,7 +120,7 @@ exports.getProductDetail = async (req, res, next) => {
 
     if (!product) {
       return res.status(404).render('errors/404', {
-        title: 'Product Not Found - Flipkart',
+        title: 'Product Not Found - My Local Shop',
         message: 'The product you are looking for is no longer available.'
       });
     }
@@ -188,7 +188,7 @@ exports.getProductDetail = async (req, res, next) => {
     }).limit(4).lean();
 
     res.render('products/show', {
-      title: `${product.name} - Flipkart`,
+      title: `${product.name} - My Local Shop`,
       product,
       reviews,
       canReview,

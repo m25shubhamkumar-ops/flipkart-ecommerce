@@ -78,7 +78,7 @@ exports.getCart = async (req, res, next) => {
     const totals = calculateCartTotals(validItems);
 
     res.render('cart/index', {
-      title: 'Shopping Cart - Flipkart',
+      title: 'Shopping Cart - My Local Shop',
       items: validItems,
       totals,
       formatPrice

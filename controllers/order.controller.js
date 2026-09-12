@@ -43,7 +43,7 @@ exports.getCheckout = async (req, res, next) => {
     const addresses = await Address.find({ userId: req.user._id }).sort({ isDefault: -1, createdAt: -1 });
 
     res.render('checkout/index', {
-      title: 'Checkout - Flipkart',
+      title: 'Checkout - My Local Shop',
       items: validItems,
       addresses,
       totals: { subtotal, discount: totalDiscount, shipping, grandTotal },
@@ -170,7 +170,7 @@ exports.postCreateOrder = async (req, res, next) => {
       statusTimeline: [
         {
           status: 'Placed',
-          message: 'Order received and confirmed by Flipkart.',
+          message: 'Order received and confirmed by My Local Shop.',
           timestamp: new Date(),
           updatedBy: req.user._id
         }
@@ -195,7 +195,7 @@ exports.getMyOrders = async (req, res, next) => {
       .lean();
 
     res.render('orders/index', {
-      title: 'My Orders - Flipkart',
+      title: 'My Orders - My Local Shop',
       orders,
       formatPrice,
       formatDate
@@ -239,7 +239,7 @@ exports.getOrderDetail = async (req, res, next) => {
     }
 
     res.render('orders/show', {
-      title: `Order #${order.orderNumber} Details - Flipkart`,
+      title: `Order #${order.orderNumber} Details - My Local Shop`,
       order,
       steps,
       currentStepIndex,

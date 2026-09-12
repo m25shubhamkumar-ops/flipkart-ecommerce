@@ -1,12 +1,12 @@
-# 🛍️ Flipkart E-Commerce Platform (Simple Project Guide)
+# 🏪 My Local Shop E-Commerce Platform (Simple Project Guide)
 
 > **Quick Summary for Explaining This Project**:  
-> A production-ready Flipkart clone built with **Node.js, Express, MongoDB, EJS, and Tailwind CSS**. It features a 3-tier Role-Based Access Control system for **Customers**, **Delivery Agents**, and **Admins**.
+> A production-ready hyper-local e-commerce platform rebranded to **My Local Shop** with a tactile modern **3D UI Design System**, built with **Node.js, Express, MongoDB, EJS, and Tailwind CSS**. It features a 3-tier Role-Based Access Control system for **Customers**, **Delivery Agents**, and **Admins**.
 
 ---
 
 ## 🚀 1. What is this project? (Elevator Pitch)
-This is a complete, full-stack e-commerce marketplace that works just like Flipkart. It allows customers to shop and track orders, delivery agents to navigate to doorsteps and collect cash, and admins to manage the entire business with real-time sales trend charts and security logs.
+This is a complete, full-stack e-commerce marketplace called **My Local Shop**. It features modern 3D tactile UI elements (depth cards, press-down buttons, ambient glass glows), allowing customers to shop and track orders, delivery agents to navigate to doorsteps and collect cash, and admins to manage the entire business with real-time sales trend charts and security logs.
 
 ---
 
@@ -47,6 +47,8 @@ This is a complete, full-stack e-commerce marketplace that works just like Flipk
    Interactive dual-axis chart in the admin panel showing revenue lines and order volume bars with instant timeframe switching.
 5. **🔒 Bulletproof Security**:  
    Passwords hashed with **bcrypt**, sessions managed via stateless **JWT in HTTP-only secure cookies** (immune to client-side XSS attacks), and all public demo login links removed so portals are strictly private.
+6. **🎨 Modern 3D Tactile UI & Rich Color Palette**:  
+   Tactile 3D press-down buttons, floating elevation cards with hover lift, 3D category orbs with ambient glows, recessed image pedestals, and a rich palette (Electric Indigo, Midnight Navy, Radiant Amber, and Emerald Green).
 
 ---
 

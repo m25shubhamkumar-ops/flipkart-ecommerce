@@ -10,7 +10,7 @@ exports.getWishlist = async (req, res, next) => {
     const products = wishlist ? wishlist.productIds.filter(p => p && p.isActive) : [];
 
     res.render('wishlist/index', {
-      title: 'My Wishlist - Flipkart',
+      title: 'My Wishlist - My Local Shop',
       products,
       formatPrice
     });

@@ -107,7 +107,7 @@ app.use(errorHandler);
 const PORT = process.env.PORT || 3000;
 if (process.env.NODE_ENV !== 'test') {
   app.listen(PORT, () => {
-    console.log(`\n🚀 Flipkart E-Commerce Server is running on http://localhost:${PORT}`);
+    console.log(`\n🚀 My Local Shop Server is running on http://localhost:${PORT}`);
     console.log(`📦 Active Roles: [Customer] [Delivery Agent] [Admin]`);
   });
 }

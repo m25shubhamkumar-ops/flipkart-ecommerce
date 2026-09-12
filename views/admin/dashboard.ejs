@@ -5,54 +5,61 @@
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
     
     <!-- Admin Header Banner -->
-    <div class="bg-gradient-to-r from-purple-800 via-indigo-800 to-blue-900 text-white p-6 rounded-md shadow flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-      <div>
-        <div class="inline-flex items-center gap-1.5 bg-purple-950/60 text-purple-200 text-xs px-2.5 py-0.5 rounded font-bold uppercase tracking-wider mb-2">
+    <div class="bg-gradient-to-r from-slate-950 via-indigo-950 to-blue-950 text-white p-7 rounded-2xl shadow-xl border border-indigo-500/25 flex flex-col md:flex-row items-start md:items-center justify-between gap-5 relative overflow-hidden">
+      <div class="absolute -right-10 -bottom-10 w-64 h-64 bg-amber-500/10 rounded-full blur-3xl pointer-events-none"></div>
+
+      <div class="relative">
+        <div class="inline-flex items-center gap-1.5 bg-amber-400/20 text-amber-300 text-xs px-3 py-1 rounded-full font-bold uppercase tracking-wider mb-2.5 border border-amber-400/30">
           <i class="fa-solid fa-shield-halved"></i> Master Control Panel
         </div>
-        <h1 class="text-2xl font-black">Flipkart Admin Center</h1>
-        <p class="text-xs text-purple-200 mt-1">Logged in as Administrator: <%= currentUser.name %> (<%= currentUser.email %>)</p>
+        <h1 class="text-2xl sm:text-3xl font-black tracking-tight text-white flex items-center gap-2">
+          <span class="w-8 h-8 rounded-lg bg-gradient-to-tr from-amber-400 to-amber-500 text-slate-950 flex items-center justify-center text-sm shadow-md">
+            <i class="fa-solid fa-shop"></i>
+          </span>
+          My Local Shop Admin Center
+        </h1>
+        <p class="text-xs text-indigo-200 mt-1.5">Logged in as Administrator: <strong><%= currentUser.name %></strong> (<%= currentUser.email %>)</p>
       </div>
 
-      <div class="flex flex-wrap gap-2 text-xs">
-        <a href="/admin/products/new" class="bg-[#ffe500] hover:bg-yellow-400 text-gray-900 font-bold px-4 py-2 rounded shadow transition inline-flex items-center gap-1.5">
-          <i class="fa-solid fa-plus"></i> Add Product
+      <div class="relative flex flex-wrap gap-2.5 text-xs">
+        <a href="/admin/products/new" class="btn-3d-amber text-xs px-4 py-2">
+          <i class="fa-solid fa-plus mr-1.5"></i> Add Product
         </a>
-        <a href="/admin/orders" class="bg-white/20 hover:bg-white/30 text-white font-bold px-4 py-2 rounded transition inline-flex items-center gap-1.5">
-          <i class="fa-solid fa-boxes-packing"></i> Orders Queue
+        <a href="/admin/orders" class="btn-3d-white text-xs px-4 py-2">
+          <i class="fa-solid fa-boxes-packing mr-1.5 text-indigo-600"></i> Orders Queue
         </a>
-        <a href="/admin/login-activity" class="bg-white/20 hover:bg-white/30 text-white font-bold px-4 py-2 rounded transition inline-flex items-center gap-1.5">
-          <i class="fa-solid fa-user-shield"></i> Audit Trail
+        <a href="/admin/login-activity" class="btn-3d-white text-xs px-4 py-2">
+          <i class="fa-solid fa-user-shield mr-1.5 text-indigo-600"></i> Audit Trail
         </a>
       </div>
     </div>
 
-    <!-- KPI Metric Cards -->
+    <!-- 3D KPI Metric Cards -->
     <div class="grid grid-cols-2 lg:grid-cols-5 gap-4 text-xs">
       
-      <div class="bg-white p-5 rounded-sm shadow-sm border border-gray-200">
-        <div class="text-gray-500 font-medium uppercase tracking-wider text-[10px]">Total Revenue</div>
-        <div class="text-xl sm:text-2xl font-black text-gray-900 mt-1"><%= formatPrice(stats.totalRevenue) %></div>
+      <div class="card-3d p-5 rounded-2xl border-t-4 border-t-indigo-600">
+        <div class="text-slate-400 font-bold uppercase tracking-wider text-[10px]">Total Revenue</div>
+        <div class="text-xl sm:text-2xl font-black text-slate-900 mt-1"><%= formatPrice(stats.totalRevenue) %></div>
       </div>
 
-      <div class="bg-white p-5 rounded-sm shadow-sm border border-gray-200">
-        <div class="text-gray-500 font-medium uppercase tracking-wider text-[10px]">Total Orders</div>
+      <div class="card-3d p-5 rounded-2xl border-t-4 border-t-blue-600">
+        <div class="text-slate-400 font-bold uppercase tracking-wider text-[10px]">Total Orders</div>
         <div class="text-xl sm:text-2xl font-black text-blue-600 mt-1"><%= stats.totalOrders %></div>
       </div>
 
-      <div class="bg-white p-5 rounded-sm shadow-sm border border-gray-200">
-        <div class="text-gray-500 font-medium uppercase tracking-wider text-[10px]">Customers</div>
+      <div class="card-3d p-5 rounded-2xl border-t-4 border-t-emerald-600">
+        <div class="text-slate-400 font-bold uppercase tracking-wider text-[10px]">Customers</div>
         <div class="text-xl sm:text-2xl font-black text-emerald-600 mt-1"><%= stats.totalUsers %></div>
       </div>
 
-      <div class="bg-white p-5 rounded-sm shadow-sm border border-gray-200">
-        <div class="text-gray-500 font-medium uppercase tracking-wider text-[10px]">Delivery Agents</div>
+      <div class="card-3d p-5 rounded-2xl border-t-4 border-t-teal-600">
+        <div class="text-slate-400 font-bold uppercase tracking-wider text-[10px]">Delivery Fleet</div>
         <div class="text-xl sm:text-2xl font-black text-teal-600 mt-1"><%= stats.totalDeliveryAgents %></div>
       </div>
 
-      <div class="bg-white p-5 rounded-sm shadow-sm border border-gray-200">
-        <div class="text-gray-500 font-medium uppercase tracking-wider text-[10px]">Low Stock Alert</div>
-        <div class="text-xl sm:text-2xl font-black text-red-600 mt-1"><%= stats.lowStockProducts %></div>
+      <div class="card-3d p-5 rounded-2xl border-t-4 border-t-rose-600">
+        <div class="text-slate-400 font-bold uppercase tracking-wider text-[10px]">Low Stock Alert</div>
+        <div class="text-xl sm:text-2xl font-black text-rose-600 mt-1"><%= stats.lowStockProducts %></div>
       </div>
 
     </div>

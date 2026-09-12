@@ -40,7 +40,7 @@ exports.getDashboard = async (req, res, next) => {
     const salesTrend = getSalesTrends(nonCancelledOrders);
 
     res.render('admin/dashboard', {
-      title: 'Admin Control Center - Flipkart',
+      title: 'Admin Control Center - My Local Shop',
       stats: {
         totalOrders,
         totalUsers,
@@ -137,7 +137,7 @@ exports.postCreateProduct = async (req, res, next) => {
       price: Number(price),
       discountPrice: discountPrice ? Number(discountPrice) : 0,
       categoryId,
-      brand: brand ? brand.trim() : 'Flipkart Assured',
+      brand: brand ? brand.trim() : 'Local Assured',
       stock: Number(stock) || 0,
       images: imageArray.length > 0 ? imageArray : ['https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=600&q=80']
     });

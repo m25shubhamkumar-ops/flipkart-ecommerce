@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title><%= typeof title !== 'undefined' ? title : 'Flipkart - Online Shopping Platform' %></title>
+  <title><%= typeof title !== 'undefined' ? title : 'My Local Shop - Your Neighborhood Online Store' %></title>
   
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -12,11 +12,24 @@
       theme: {
         extend: {
           colors: {
-            fkBlue: '#2874f0',
-            fkYellow: '#ffe500',
-            fkOrange: '#fb641b',
-            fkGreen: '#388e3c',
-            fkGrayBg: '#f1f3f6'
+            localBrand: '#4f46e5',      // Electric Indigo
+            localBrandDark: '#1e1b4b',  // Deep Midnight Navy
+            localAccent: '#f59e0b',     // Radiant Amber
+            localEmerald: '#10b981',    // Emerald Green
+            localSlate: '#0f172a',      // Dark Slate
+            localBg: '#f8fafc',         // Soft Porcelain Slate
+            // Backwards compatibility aliases
+            fkBlue: '#4f46e5',
+            fkYellow: '#f59e0b',
+            fkOrange: '#ea580c',
+            fkGreen: '#10b981',
+            fkGrayBg: '#f8fafc'
+          },
+          boxShadow: {
+            '3d-sm': '0 4px 6px -1px rgba(0, 0, 0, 0.07), 0 2px 4px -2px rgba(0, 0, 0, 0.05), inset 0 1px 0 rgba(255, 255, 255, 0.6)',
+            '3d-card': '0 10px 25px -5px rgba(15, 23, 42, 0.08), 0 8px 10px -6px rgba(15, 23, 42, 0.04), 0 0 0 1px rgba(226, 232, 240, 0.8)',
+            '3d-hover': '0 20px 35px -10px rgba(79, 70, 229, 0.18), 0 12px 15px -8px rgba(15, 23, 42, 0.08), 0 0 0 1px rgba(99, 102, 241, 0.25)',
+            '3d-glow': '0 0 25px rgba(245, 158, 11, 0.35)'
           }
         }
       }
@@ -26,17 +39,117 @@
   <!-- FontAwesome 6 CDN -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
 
-  <!-- Inter / Roboto font -->
+  <!-- Plus Jakarta Sans / Roboto font -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Roboto:wght@400;500;700;900&display=swap" rel="stylesheet">
 
   <style>
     body {
-      font-family: 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-      background-color: #f1f3f6;
-      color: #212121;
+      font-family: 'Plus Jakarta Sans', 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background-color: #f8fafc;
+      color: #0f172a;
+    }
+
+    /* 3D Visual Card System */
+    .card-3d {
+      background: #ffffff;
+      border: 1px solid rgba(226, 232, 240, 0.9);
+      border-radius: 0.75rem;
+      box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.06), 0 8px 10px -6px rgba(15, 23, 42, 0.03);
+      transition: all 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+      position: relative;
+    }
+    .card-3d:hover {
+      transform: translateY(-5px) scale(1.012);
+      box-shadow: 0 22px 35px -10px rgba(79, 70, 229, 0.16), 0 10px 15px -5px rgba(15, 23, 42, 0.05);
+      border-color: rgba(165, 180, 252, 0.8);
+    }
+
+    /* 3D Tactile Buttons (Physical Press State) */
+    .btn-3d-primary {
+      background: linear-gradient(135deg, #4f46e5 0%, #4338ca 100%);
+      color: #ffffff;
+      border-bottom: 4px solid #312e81;
+      border-radius: 0.5rem;
+      font-weight: 700;
+      transition: all 0.12s ease-in-out;
+      box-shadow: 0 4px 6px -1px rgba(79, 70, 229, 0.3);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .btn-3d-primary:hover {
+      filter: brightness(1.06);
+    }
+    .btn-3d-primary:active {
+      transform: translateY(3px);
+      border-bottom-width: 1px;
+      margin-bottom: 3px;
+      box-shadow: 0 1px 2px rgba(79, 70, 229, 0.2);
+    }
+
+    .btn-3d-amber {
+      background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+      color: #0f172a;
+      border-bottom: 4px solid #b45309;
+      border-radius: 0.5rem;
+      font-weight: 800;
+      transition: all 0.12s ease-in-out;
+      box-shadow: 0 4px 8px -1px rgba(245, 158, 11, 0.35);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .btn-3d-amber:hover {
+      filter: brightness(1.05);
+    }
+    .btn-3d-amber:active {
+      transform: translateY(3px);
+      border-bottom-width: 1px;
+      margin-bottom: 3px;
+      box-shadow: 0 1px 2px rgba(245, 158, 11, 0.2);
+    }
+
+    .btn-3d-white {
+      background: #ffffff;
+      color: #1e293b;
+      border: 1px solid #e2e8f0;
+      border-bottom: 4px solid #cbd5e1;
+      border-radius: 0.5rem;
+      font-weight: 700;
+      transition: all 0.12s ease-in-out;
+      box-shadow: 0 4px 6px -1px rgba(15, 23, 42, 0.05);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .btn-3d-white:hover {
+      background-color: #f8fafc;
+    }
+    .btn-3d-white:active {
+      transform: translateY(3px);
+      border-bottom-width: 1px;
+      margin-bottom: 3px;
+    }
+
+    /* 3D Circular Category Orbs */
+    .orb-3d {
+      background: linear-gradient(145deg, #ffffff 0%, #f1f5f9 100%);
+      border-radius: 9999px;
+      box-shadow: 0 8px 16px -4px rgba(15, 23, 42, 0.08), inset 0 2px 0 rgba(255, 255, 255, 0.9), 0 0 0 1px rgba(226, 232, 240, 0.9);
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .orb-3d:hover {
+      transform: translateY(-4px) scale(1.08);
+      box-shadow: 0 16px 24px -6px rgba(79, 70, 229, 0.22), 0 0 0 2px #6366f1;
+    }
+
+    /* 3D Embossed Pill Badge */
+    .badge-3d {
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.06), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+      border-radius: 9999px;
     }
   </style>
 </head>
-<body class="min-h-screen flex flex-col bg-[#f1f3f6]">
+<body class="min-h-screen flex flex-col bg-[#f8fafc]">
