@@ -29,10 +29,19 @@
     <% } %>
 
     <!-- Header bar -->
-    <div class="bg-white p-4 rounded-sm shadow-sm border border-gray-200 flex flex-wrap items-center justify-between gap-3 text-xs">
-      <div>
-        <h1 class="text-base font-bold text-gray-900">Order #<%= order.orderNumber %></h1>
-        <span class="text-gray-500">Placed on <%= formatDate(order.createdAt) %></span>
+    <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200/80 flex flex-wrap items-center justify-between gap-3 text-xs card-3d">
+      <div class="flex items-center gap-3">
+        <div>
+          <div class="flex items-center gap-2">
+            <h1 class="text-base font-black text-gray-900">Order #<%= order.orderNumber %></h1>
+            <% if (order.deliveryOption === '10_min_express') { %>
+              <span class="bg-amber-400 text-slate-950 font-black text-[10px] px-2 py-0.5 rounded-full uppercase tracking-wider inline-flex items-center gap-1 shadow-sm">
+                <i class="fa-solid fa-bolt"></i> 10-Min Express
+              </span>
+            <% } %>
+          </div>
+          <span class="text-gray-500 text-xs">Placed on <%= formatDate(order.createdAt) %></span>
+        </div>
       </div>
 
       <div class="flex items-center gap-3">
@@ -61,6 +70,35 @@
         </button>
       </div>
     </div>
+
+    <!-- 10-Minute Express Delivery Banner (If applicable) -->
+    <% if (order.deliveryOption === '10_min_express') { %>
+      <div class="bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 text-slate-950 p-4 sm:p-5 rounded-2xl shadow-xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 card-3d">
+        <div class="flex items-center gap-3.5">
+          <div class="w-12 h-12 rounded-xl bg-slate-950 text-amber-400 flex items-center justify-center text-2xl font-black shadow-inner flex-shrink-0">
+            <i class="fa-solid fa-bolt"></i>
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="text-[10px] font-black uppercase tracking-widest bg-slate-950 text-amber-400 px-2 py-0.5 rounded">Turbo Quick-Commerce</span>
+              <span class="text-xs font-bold text-slate-900">Priority Dark-Store Dispatch</span>
+            </div>
+            <h2 class="text-lg sm:text-xl font-black tracking-tight text-slate-950 mt-0.5">
+              ⚡ Guaranteed 10-Minute Express Delivery
+            </h2>
+            <p class="text-xs font-semibold text-slate-900/90">
+              Estimated Doorstep Arrival: <strong class="text-slate-950 underline"><%= order.estimatedDeliveryTime ? new Date(order.estimatedDeliveryTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Within 10 minutes' %></strong> • Dedicated local delivery partner
+            </p>
+          </div>
+        </div>
+        <div class="bg-white/95 backdrop-blur-md px-4 py-2 rounded-xl border border-white/50 shadow text-center sm:text-right flex-shrink-0">
+          <div class="text-[10px] uppercase font-bold text-slate-600">Express Priority Queue</div>
+          <div class="text-xs font-black text-emerald-700 flex items-center gap-1.5 justify-center sm:justify-end mt-0.5">
+            <span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span> On Fast Track
+          </div>
+        </div>
+      </div>
+    <% } %>
 
     <!-- Live Status Tracker Timeline -->
     <div class="bg-white p-6 rounded-sm shadow-sm border border-gray-200">
@@ -349,9 +387,15 @@
             <span>- <%= formatPrice(order.totals.discount) %></span>
           </div>
           <div class="flex justify-between text-gray-600">
-            <span>Shipping:</span>
-            <span><%= order.totals.shipping === 0 ? 'FREE' : formatPrice(order.totals.shipping) %></span>
+            <span>Standard Delivery:</span>
+            <span><%= (order.totals.shipping - (order.expressDeliveryCharge || 0)) <= 0 ? 'FREE' : formatPrice(order.totals.shipping - (order.expressDeliveryCharge || 0)) %></span>
           </div>
+          <% if (order.deliveryOption === '10_min_express' || (order.expressDeliveryCharge && order.expressDeliveryCharge > 0)) { %>
+            <div class="flex justify-between text-amber-700 font-bold">
+              <span class="flex items-center gap-1"><i class="fa-solid fa-bolt text-amber-500"></i> 10-Min Express Fee:</span>
+              <span>+ <%= formatPrice(order.expressDeliveryCharge || 29) %></span>
+            </div>
+          <% } %>
           <div class="border-t pt-2 flex justify-between font-black text-sm text-gray-900">
             <span>Total Paid / Due:</span>
             <span><%= formatPrice(order.totals.grandTotal) %></span>

@@ -70,6 +70,13 @@ const orderSchema = new mongoose.Schema(
       default: null,
       index: true
     },
+    deliveryOption: {
+      type: String,
+      enum: ['standard', '10_min_express'],
+      default: 'standard'
+    },
+    expressDeliveryCharge: { type: Number, default: 0 },
+    estimatedDeliveryTime: { type: Date },
     deliveryNotes: { type: String, default: '' },
     cancellationDetails: {
       reason: { type: String, default: '' },

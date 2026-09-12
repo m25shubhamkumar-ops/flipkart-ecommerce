@@ -80,7 +80,14 @@
             <tbody class="divide-y divide-gray-100">
               <% shipments.forEach(sh => { %>
                 <tr class="hover:bg-gray-50">
-                  <td class="p-3 font-bold text-gray-900">#<%= sh.orderNumber %></td>
+                  <td class="p-3">
+                    <div class="font-bold text-gray-900">#<%= sh.orderNumber %></div>
+                    <% if (sh.deliveryOption === '10_min_express') { %>
+                      <span class="bg-amber-400 text-slate-950 font-black text-[9px] px-1.5 py-0.5 rounded-full uppercase tracking-wider inline-flex items-center gap-1 animate-pulse shadow-sm mt-1">
+                        <i class="fa-solid fa-bolt"></i> 10-Min Turbo
+                      </span>
+                    <% } %>
+                  </td>
                   <td class="p-3">
                     <div class="font-medium"><%= sh.addressSnapshot.fullName %></div>
                     <div class="text-gray-400 text-[11px]"><%= sh.addressSnapshot.phone %></div>

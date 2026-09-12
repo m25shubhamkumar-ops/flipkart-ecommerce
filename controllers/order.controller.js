@@ -37,8 +37,9 @@ exports.getCheckout = async (req, res, next) => {
     });
 
     const finalItemsPrice = subtotal - totalDiscount;
-    const shipping = finalItemsPrice > 500 ? 0 : 40;
-    const grandTotal = finalItemsPrice + shipping;
+    const baseShipping = finalItemsPrice > 500 ? 0 : 40;
+    const expressFee = 29;
+    const grandTotal = finalItemsPrice + baseShipping;
 
     const addresses = await Address.find({ userId: req.user._id }).sort({ isDefault: -1, createdAt: -1 });
 
@@ -46,7 +47,7 @@ exports.getCheckout = async (req, res, next) => {
       title: 'Checkout - My Local Shop',
       items: validItems,
       addresses,
-      totals: { subtotal, discount: totalDiscount, shipping, grandTotal },
+      totals: { subtotal, discount: totalDiscount, shipping: baseShipping, expressFee, grandTotal },
       error: req.query.error || null,
       formatPrice
     });
@@ -58,7 +59,7 @@ exports.getCheckout = async (req, res, next) => {
 // Place Order
 exports.postCreateOrder = async (req, res, next) => {
   try {
-    const { addressId, paymentMethod = 'COD', fullName, phone, line1, line2, city, state, pincode } = req.body;
+    const { addressId, paymentMethod = 'COD', deliveryOption = 'standard', fullName, phone, line1, line2, city, state, pincode } = req.body;
 
     let address = null;
 
@@ -139,15 +140,24 @@ exports.postCreateOrder = async (req, res, next) => {
     }
 
     const finalItemsPrice = subtotal - totalDiscount;
-    const shipping = finalItemsPrice > 500 ? 0 : 40;
+    const isExpress10Min = deliveryOption === '10_min_express';
+    const baseShipping = finalItemsPrice > 500 ? 0 : 40;
+    const expressDeliveryCharge = isExpress10Min ? 29 : 0;
+    const shipping = baseShipping + expressDeliveryCharge;
     const grandTotal = finalItemsPrice + shipping;
 
     const orderNumber = generateOrderNumber();
+    const estimatedDeliveryTime = isExpress10Min
+      ? new Date(Date.now() + 10 * 60 * 1000)
+      : new Date(Date.now() + 2 * 60 * 60 * 1000);
 
     const order = await Order.create({
       userId: req.user._id,
       orderNumber,
       items: orderItems,
+      deliveryOption: isExpress10Min ? '10_min_express' : 'standard',
+      expressDeliveryCharge,
+      estimatedDeliveryTime,
       totals: {
         subtotal,
         shipping,
@@ -170,7 +180,9 @@ exports.postCreateOrder = async (req, res, next) => {
       statusTimeline: [
         {
           status: 'Placed',
-          message: 'Order received and confirmed by My Local Shop.',
+          message: isExpress10Min
+            ? '⚡ 10-Minute Express Delivery Order Placed! Priority dark-store dispatch initiated.'
+            : 'Order received and confirmed by My Local Shop.',
           timestamp: new Date(),
           updatedBy: req.user._id
         }

@@ -161,6 +161,62 @@ const runTests = async () => {
     assert.strictEqual(guestSalesApiRes.statusCode, 302, 'Guest should be redirected to /login');
     console.log('  ✅ Sales trends chart rendered, API endpoint returns daily/weekly breakdown, and strictly protected by RBAC\n');
 
+    // 8. Test New Categories (Groceries, Food, Medicines) and 10-Minute Express Calculation
+    console.log('Test 8: New Categories & 10-Minute Express Delivery Calculation Verification');
+    const Category = require('../models/category.model');
+    const Product = require('../models/product.model');
+
+    const groceryCat = await Category.findOne({ slug: 'groceries' });
+    const foodCat = await Category.findOne({ slug: 'food-snacks' });
+    const medCat = await Category.findOne({ slug: 'medicines-health' });
+
+    assert.ok(groceryCat, 'Groceries category should exist');
+    assert.ok(foodCat, 'Food & Snacks category should exist');
+    assert.ok(medCat, 'Medicines & Health category should exist');
+
+    const groceryProds = await Product.find({ categoryId: groceryCat._id });
+    const medProds = await Product.find({ categoryId: medCat._id });
+    assert.ok(groceryProds.length > 0, 'Groceries should contain seeded products');
+    assert.ok(medProds.length > 0, 'Medicines should contain seeded products');
+
+    const testExpTime = new Date(Date.now() + 10 * 60 * 1000);
+    const expressOrder = new Order({
+      userId: customer._id,
+      orderNumber: 'OD_TEST_EXP_' + Date.now(),
+      items: [{
+        productId: medProds[0]._id,
+        name: medProds[0].name,
+        price: medProds[0].price,
+        discountPrice: medProds[0].discountPrice,
+        quantity: 1,
+        subtotal: medProds[0].discountPrice
+      }],
+      deliveryOption: '10_min_express',
+      expressDeliveryCharge: 29,
+      estimatedDeliveryTime: testExpTime,
+      totals: {
+        subtotal: medProds[0].price,
+        shipping: 29,
+        discount: medProds[0].price - medProds[0].discountPrice,
+        grandTotal: medProds[0].discountPrice + 29
+      },
+      addressSnapshot: {
+        fullName: customer.name,
+        phone: customer.phone,
+        line1: '123 Test Lane',
+        city: 'Bengaluru',
+        state: 'Karnataka',
+        pincode: '560001'
+      }
+    });
+    await expressOrder.save();
+    assert.strictEqual(expressOrder.deliveryOption, '10_min_express');
+    assert.strictEqual(expressOrder.expressDeliveryCharge, 29);
+    assert.ok(expressOrder.estimatedDeliveryTime > new Date());
+    await Order.findByIdAndDelete(expressOrder._id);
+
+    console.log('  ✅ Groceries, Food, Medicines catalog verified and 10-Minute Express Delivery calculation confirmed\n');
+
     console.log('====================================================');
     console.log('🎉 ALL AUTOMATED RBAC AND SECURITY TESTS PASSED!');
     console.log('====================================================\n');

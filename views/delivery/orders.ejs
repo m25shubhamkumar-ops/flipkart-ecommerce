@@ -41,9 +41,16 @@
                 <span class="font-bold text-gray-900">#<%= order.orderNumber %></span>
                 <span class="text-gray-400 text-[11px] block"><%= formatDate(order.createdAt) %></span>
               </div>
-              <span class="text-xs font-bold px-2 py-0.5 rounded <%= order.orderStatus === 'Delivered' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800' %>">
-                <%= order.orderStatus %>
-              </span>
+              <div class="flex items-center gap-1.5">
+                <% if (order.deliveryOption === '10_min_express') { %>
+                  <span class="bg-amber-400 text-slate-950 font-black text-[10px] px-2.5 py-0.5 rounded-full uppercase tracking-wider animate-pulse flex items-center gap-1 shadow-sm">
+                    <i class="fa-solid fa-bolt"></i> 10-Min Turbo
+                  </span>
+                <% } %>
+                <span class="text-xs font-bold px-2 py-0.5 rounded <%= order.orderStatus === 'Delivered' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800' %>">
+                  <%= order.orderStatus %>
+                </span>
+              </div>
             </div>
 
             <!-- Recipient & Address -->

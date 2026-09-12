@@ -95,6 +95,21 @@ const seedDB = async () => {
         name: 'Appliances',
         slug: 'appliances',
         image: 'https://images.unsplash.com/photo-1585659722983-3a675dabf23d?w=200&q=80'
+      },
+      {
+        name: 'Groceries',
+        slug: 'groceries',
+        image: 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=200&q=80'
+      },
+      {
+        name: 'Food & Snacks',
+        slug: 'food-snacks',
+        image: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?w=200&q=80'
+      },
+      {
+        name: 'Medicines & Health',
+        slug: 'medicines-health',
+        image: 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=200&q=80'
       }
     ]);
 
@@ -232,6 +247,243 @@ const seedDB = async () => {
         stock: 3,
         ratingAvg: 4.3,
         ratingCount: 420
+      },
+      // --- Groceries & Daily Staples ---
+      {
+        name: 'Aashirvaad Superior MP Whole Wheat Atta (5 kg)',
+        slug: 'aashirvaad-superior-mp-whole-wheat-atta-5kg',
+        description: '100% pure whole wheat grain flour with superior aroma, nutrition, and natural dietary fiber for extra soft rotis.',
+        price: 295,
+        discountPrice: 265,
+        images: ['https://images.unsplash.com/photo-1509440159596-0249088772ff?w=600&q=80'],
+        categoryId: catMap['groceries'],
+        brand: 'Aashirvaad',
+        stock: 50,
+        ratingAvg: 4.7,
+        ratingCount: 320
+      },
+      {
+        name: 'Fortune Sunlite Refined Sunflower Oil (1 L Pouch)',
+        slug: 'fortune-sunlite-refined-sunflower-oil-1l',
+        description: 'Light, healthy and easily digestible sunflower cooking oil fortified with Vitamins A & D.',
+        price: 165,
+        discountPrice: 138,
+        images: ['https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?w=600&q=80'],
+        categoryId: catMap['groceries'],
+        brand: 'Fortune',
+        stock: 45,
+        ratingAvg: 4.6,
+        ratingCount: 210
+      },
+      {
+        name: 'India Gate Super Basmati Rice (5 kg)',
+        slug: 'india-gate-super-basmati-rice-5kg',
+        description: 'Aged long-grain aromatic Basmati rice ideal for everyday pulao, biryani, and special family dining.',
+        price: 575,
+        discountPrice: 449,
+        images: ['https://images.unsplash.com/photo-1586201375761-83865001e31c?w=600&q=80'],
+        categoryId: catMap['groceries'],
+        brand: 'India Gate',
+        stock: 35,
+        ratingAvg: 4.8,
+        ratingCount: 415
+      },
+      {
+        name: 'Tata Salt Vacuum Evaporated Iodised Salt (1 kg)',
+        slug: 'tata-salt-vacuum-evaporated-iodised-salt-1kg',
+        description: 'India’s trusted national salt brand with guaranteed iodine purity and vacuum evaporation technology.',
+        price: 30,
+        discountPrice: 26,
+        images: ['https://images.unsplash.com/photo-1518977676601-b53f82aba655?w=600&q=80'],
+        categoryId: catMap['groceries'],
+        brand: 'Tata Salt',
+        stock: 120,
+        ratingAvg: 4.9,
+        ratingCount: 950
+      },
+      {
+        name: 'Amul Pure Cow Ghee (1 L Tin)',
+        slug: 'amul-pure-cow-ghee-1l-tin',
+        description: 'Traditional granular golden cow ghee with rich natural aroma and authentic desi taste.',
+        price: 680,
+        discountPrice: 620,
+        images: ['https://images.unsplash.com/photo-1589927986089-35812388d1f4?w=600&q=80'],
+        categoryId: catMap['groceries'],
+        brand: 'Amul',
+        stock: 28,
+        ratingAvg: 4.8,
+        ratingCount: 340
+      },
+      {
+        name: 'Tata Sampann Unpolished Toor Dal (1 kg)',
+        slug: 'tata-sampann-unpolished-toor-dal-1kg',
+        description: 'Unpolished protein-rich arhar dal packed without artificial coloring or water polishing.',
+        price: 199,
+        discountPrice: 175,
+        images: ['https://images.unsplash.com/photo-1515543237350-b3eea1ec8082?w=600&q=80'],
+        categoryId: catMap['groceries'],
+        brand: 'Tata Sampann',
+        stock: 60,
+        ratingAvg: 4.6,
+        ratingCount: 180
+      },
+      // --- Food & Snacks ---
+      {
+        name: 'Amul Taaza Homogenised Toned Milk (1 L Tetra Pak)',
+        slug: 'amul-taaza-homogenised-toned-milk-1l',
+        description: 'UHT treated fresh milk with zero preservatives, ready to drink straight from the pack with no boiling needed.',
+        price: 78,
+        discountPrice: 72,
+        images: ['https://images.unsplash.com/photo-1550583724-b2692b85b150?w=600&q=80'],
+        categoryId: catMap['food-snacks'],
+        brand: 'Amul',
+        stock: 80,
+        ratingAvg: 4.8,
+        ratingCount: 520
+      },
+      {
+        name: 'Britannia 100% Whole Wheat Bread (400 g)',
+        slug: 'britannia-100-percent-whole-wheat-bread-400g',
+        description: 'Soft and healthy morning breakfast bread baked with 100% whole wheat grains and zero added maida.',
+        price: 50,
+        discountPrice: 45,
+        images: ['https://images.unsplash.com/photo-1509440159596-0249088772ff?w=600&q=80'],
+        categoryId: catMap['food-snacks'],
+        brand: 'Britannia',
+        stock: 65,
+        ratingAvg: 4.5,
+        ratingCount: 290
+      },
+      {
+        name: 'Farm Fresh Grade-A White Eggs (Pack of 12)',
+        slug: 'farm-fresh-grade-a-white-eggs-12-pack',
+        description: 'Clean, sanitized, and farm-fresh poultry eggs with high protein content and golden yolks.',
+        price: 115,
+        discountPrice: 95,
+        images: ['https://images.unsplash.com/photo-1516448620398-c5f44bf9f441?w=600&q=80'],
+        categoryId: catMap['food-snacks'],
+        brand: 'Farm Fresh',
+        stock: 40,
+        ratingAvg: 4.7,
+        ratingCount: 380
+      },
+      {
+        name: 'Maggi 2-Minute Masala Instant Noodles (Pack of 12)',
+        slug: 'maggi-2-minute-masala-instant-noodles-12-pack',
+        description: 'Classic favorite noodle pack with signature roast spice blend and goodness of iron in every bite.',
+        price: 175,
+        discountPrice: 158,
+        images: ['https://images.unsplash.com/photo-1612927601601-6638404737ce?w=600&q=80'],
+        categoryId: catMap['food-snacks'],
+        brand: 'Maggi',
+        stock: 90,
+        ratingAvg: 4.9,
+        ratingCount: 1120
+      },
+      {
+        name: 'Lay\'s India\'s Magic Masala Potato Chips (115 g Party Pack)',
+        slug: 'lays-indias-magic-masala-chips-115g',
+        description: 'Crispy sliced Indian potatoes flavored with zesty red chili and authentic street chaat spices.',
+        price: 55,
+        discountPrice: 48,
+        images: ['https://images.unsplash.com/photo-1566478989037-eec170784d0b?w=600&q=80'],
+        categoryId: catMap['food-snacks'],
+        brand: 'Lay\'s',
+        stock: 110,
+        ratingAvg: 4.6,
+        ratingCount: 670
+      },
+      {
+        name: 'Cadbury Dairy Milk Silk Chocolate Bar (150 g)',
+        slug: 'cadbury-dairy-milk-silk-chocolate-bar-150g',
+        description: 'Silky smooth, creamy milk chocolate bar crafted to melt in your mouth with unforgettable sweetness.',
+        price: 190,
+        discountPrice: 165,
+        images: ['https://images.unsplash.com/photo-1549007994-cb92caebd54b?w=600&q=80'],
+        categoryId: catMap['food-snacks'],
+        brand: 'Cadbury',
+        stock: 55,
+        ratingAvg: 4.9,
+        ratingCount: 830
+      },
+      // --- Medicines & Healthcare ---
+      {
+        name: 'Dolo 650 mg Paracetamol Tablets (Strip of 15)',
+        slug: 'dolo-650mg-paracetamol-tablets-15-pack',
+        description: 'Fast-acting anti-pyretic and pain reliever tablet for rapid fever reduction, headaches, and muscle aches.',
+        price: 36,
+        discountPrice: 32,
+        images: ['https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=600&q=80'],
+        categoryId: catMap['medicines-health'],
+        brand: 'Micro Labs',
+        stock: 100,
+        ratingAvg: 4.9,
+        ratingCount: 780
+      },
+      {
+        name: 'Vicks VapoRub Fast Relief Cold & Cough Balm (50 ml)',
+        slug: 'vicks-vaporub-fast-relief-cold-cough-balm-50ml',
+        description: 'Natural menthol, camphor, and eucalyptus oil vaporizing ointment to clear blocked noses and ease coughs.',
+        price: 160,
+        discountPrice: 145,
+        images: ['https://images.unsplash.com/photo-1607613009820-a29f7bb81c04?w=600&q=80'],
+        categoryId: catMap['medicines-health'],
+        brand: 'Vicks',
+        stock: 75,
+        ratingAvg: 4.8,
+        ratingCount: 610
+      },
+      {
+        name: 'Crocin Advance Fast Pain Relief Tablets (Strip of 20)',
+        slug: 'crocin-advance-fast-pain-relief-20-pack',
+        description: 'Optizorb technology paracetamol release for fast absorption and headache relief within minutes.',
+        price: 55,
+        discountPrice: 48,
+        images: ['https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=600&q=80'],
+        categoryId: catMap['medicines-health'],
+        brand: 'GSK',
+        stock: 85,
+        ratingAvg: 4.8,
+        ratingCount: 490
+      },
+      {
+        name: 'Dettol Antiseptic Liquid Disinfectant (550 ml)',
+        slug: 'dettol-antiseptic-liquid-disinfectant-550ml',
+        description: 'Proven first-aid antiseptic liquid for cuts, bites, stings, hygiene bathing, and surface disinfection.',
+        price: 245,
+        discountPrice: 215,
+        images: ['https://images.unsplash.com/photo-1583947215259-38e31be8751f?w=600&q=80'],
+        categoryId: catMap['medicines-health'],
+        brand: 'Dettol',
+        stock: 50,
+        ratingAvg: 4.9,
+        ratingCount: 890
+      },
+      {
+        name: 'Hansaplast Waterproof First Aid Bandages (Pack of 20)',
+        slug: 'hansaplast-waterproof-first-aid-bandages-20-pack',
+        description: 'Sterile waterproof adhesive wound plaster strips that protect against dirt and bacteria during healing.',
+        price: 75,
+        discountPrice: 65,
+        images: ['https://images.unsplash.com/photo-1603398938378-e54eab446dde?w=600&q=80'],
+        categoryId: catMap['medicines-health'],
+        brand: 'Hansaplast',
+        stock: 120,
+        ratingAvg: 4.7,
+        ratingCount: 340
+      },
+      {
+        name: 'Limcee 500 mg Vitamin C Chewable Tablets (Strip of 15)',
+        slug: 'limcee-500mg-vitamin-c-chewable-tablets-15-pack',
+        description: 'Immunity booster chewable ascorbic acid tablets in delicious tangy orange flavor.',
+        price: 32,
+        discountPrice: 28,
+        images: ['https://images.unsplash.com/photo-1584017911766-d451b3d0e843?w=600&q=80'],
+        categoryId: catMap['medicines-health'],
+        brand: 'Abbott',
+        stock: 150,
+        ratingAvg: 4.9,
+        ratingCount: 920
       }
     ]);
 

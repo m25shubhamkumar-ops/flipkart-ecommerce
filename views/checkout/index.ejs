@@ -145,8 +145,56 @@
             </div>
           </div>
 
-          <!-- Step 3: Order Items Preview -->
-          <div class="bg-white rounded-sm shadow-sm border border-gray-200 p-4">
+          <!-- Step 3: Select Delivery Speed & Priority -->
+          <div class="bg-white rounded-2xl shadow-sm border border-slate-200/80 p-5 space-y-3 card-3d">
+            <div class="flex items-center justify-between border-b border-slate-100 pb-2.5">
+              <h3 class="text-xs font-black uppercase text-slate-800 tracking-wider flex items-center gap-2">
+                <i class="fa-solid fa-bolt text-amber-500 text-sm"></i> Select Delivery Speed & Priority
+              </h3>
+              <span class="text-[11px] font-bold text-amber-700 bg-amber-100/70 px-2.5 py-0.5 rounded-full border border-amber-300">
+                ⚡ Local Dark-Store Hub
+              </span>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+              
+              <!-- Standard Local Delivery -->
+              <label id="label-delivery-standard" class="relative flex items-start gap-3 p-3.5 border-2 rounded-xl cursor-pointer transition border-indigo-600 bg-indigo-50/40">
+                <input type="radio" name="deliveryOption" value="standard" checked class="mt-1 text-indigo-600 focus:ring-indigo-500" onchange="updateDeliverySpeed('standard')">
+                <div class="flex-grow">
+                  <div class="flex items-center justify-between">
+                    <span class="font-bold text-slate-900 flex items-center gap-1.5">
+                      <i class="fa-solid fa-truck text-indigo-600"></i> Standard Local Delivery
+                    </span>
+                    <span class="text-xs font-bold <%= totals.shipping === 0 ? 'text-emerald-600' : 'text-slate-800' %>">
+                      <%= totals.shipping === 0 ? 'FREE' : formatPrice(totals.shipping) %>
+                    </span>
+                  </div>
+                  <p class="text-[11px] text-slate-500 mt-1">Normal delivery dispatch: 1 - 2 Hours from confirmation.</p>
+                </div>
+              </label>
+
+              <!-- 10-Minute Express Delivery -->
+              <label id="label-delivery-express" class="relative flex items-start gap-3 p-3.5 border-2 rounded-xl cursor-pointer transition border-slate-200 hover:border-amber-400 bg-white">
+                <input type="radio" name="deliveryOption" value="10_min_express" class="mt-1 text-amber-500 focus:ring-amber-500" onchange="updateDeliverySpeed('10_min_express')">
+                <div class="flex-grow">
+                  <div class="flex items-center justify-between">
+                    <span class="font-black text-slate-900 flex items-center gap-1.5">
+                      <span class="inline-block w-4 h-4 rounded-full bg-amber-400 text-slate-950 text-[10px] text-center font-black leading-4">⚡</span> 10-Min Express Delivery
+                    </span>
+                    <span class="text-xs font-black text-amber-600">
+                      + <%= formatPrice(totals.expressFee || 29) %>
+                    </span>
+                  </div>
+                  <p class="text-[11px] text-slate-500 mt-1">Guaranteed doorstep arrival within <strong>10 minutes</strong> via dedicated local rider.</p>
+                </div>
+              </label>
+
+            </div>
+          </div>
+
+          <!-- Step 4: Order Items Preview -->
+          <div class="bg-white rounded-2xl shadow-sm border border-slate-200/80 p-5">
             <h3 class="text-xs font-bold uppercase text-gray-500 mb-3">Order Items (<%= items.length %> items)</h3>
             <div class="space-y-2 divide-y divide-gray-100">
               <% items.forEach(item => { %>
@@ -166,13 +214,13 @@
             </div>
           </div>
 
-          <!-- Step 4: Payment Mode Selection -->
-          <div class="bg-white rounded-sm shadow-sm border border-gray-200 p-4">
+          <!-- Step 5: Payment Mode Selection -->
+          <div class="bg-white rounded-2xl shadow-sm border border-slate-200/80 p-5">
             <h3 class="text-xs font-bold uppercase text-gray-800 mb-3">Select Payment Mode</h3>
             <div class="space-y-2 text-xs">
               
-              <label class="flex items-center gap-3 p-3 border rounded cursor-pointer hover:bg-gray-50 border-blue-400 bg-blue-50/20">
-                <input type="radio" name="paymentMethod" value="COD" checked class="text-blue-600">
+              <label class="flex items-center gap-3 p-3 border rounded-xl cursor-pointer hover:bg-gray-50 border-indigo-400 bg-indigo-50/20">
+                <input type="radio" name="paymentMethod" value="COD" checked class="text-indigo-600">
                 <div>
                   <div class="font-bold text-gray-900 flex items-center gap-2">
                     <i class="fa-solid fa-money-bill-wave text-emerald-600 text-sm"></i> Cash on Delivery (COD)
@@ -181,18 +229,18 @@
                 </div>
               </label>
 
-              <label class="flex items-center gap-3 p-3 border rounded cursor-pointer hover:bg-gray-50 border-gray-200">
-                <input type="radio" name="paymentMethod" value="Mock_Card" class="text-blue-600">
+              <label class="flex items-center gap-3 p-3 border rounded-xl cursor-pointer hover:bg-gray-50 border-gray-200">
+                <input type="radio" name="paymentMethod" value="Mock_Card" class="text-indigo-600">
                 <div>
                   <div class="font-bold text-gray-900 flex items-center gap-2">
-                    <i class="fa-solid fa-credit-card text-blue-600 text-sm"></i> Credit / Debit / ATM Card (Simulated Sandbox)
+                    <i class="fa-solid fa-credit-card text-indigo-600 text-sm"></i> Credit / Debit / ATM Card (Simulated Sandbox)
                   </div>
                   <div class="text-gray-500 text-[11px]">Simulate immediate card payment verification.</div>
                 </div>
               </label>
 
-              <label class="flex items-center gap-3 p-3 border rounded cursor-pointer hover:bg-gray-50 border-gray-200">
-                <input type="radio" name="paymentMethod" value="Mock_UPI" class="text-blue-600">
+              <label class="flex items-center gap-3 p-3 border rounded-xl cursor-pointer hover:bg-gray-50 border-gray-200">
+                <input type="radio" name="paymentMethod" value="Mock_UPI" class="text-indigo-600">
                 <div>
                   <div class="font-bold text-gray-900 flex items-center gap-2">
                     <i class="fa-solid fa-mobile-screen text-purple-600 text-sm"></i> UPI (PhonePe / Google Pay / Paytm)
@@ -206,8 +254,8 @@
 
           <!-- Bottom Confirm Button -->
           <div class="pt-2 flex justify-end">
-            <button type="submit" class="w-full sm:w-auto bg-[#fb641b] hover:bg-[#ea550d] text-white font-black py-3.5 px-14 rounded-sm text-sm uppercase tracking-wider shadow-md transition">
-              Confirm & Place Order
+            <button type="submit" class="btn-3d-amber w-full sm:w-auto py-3.5 px-14 text-xs font-black uppercase tracking-wider shadow-lg">
+              <i class="fa-solid fa-check-double mr-2"></i> Confirm & Place Order
             </button>
           </div>
 
@@ -216,7 +264,7 @@
       </div>
 
       <!-- Right Column: Price Summary (4 cols) -->
-      <div class="lg:col-span-4 bg-white rounded-sm shadow-sm border border-gray-200 sticky top-20">
+      <div class="lg:col-span-4 bg-white rounded-2xl shadow-sm border border-slate-200/80 sticky top-20 card-3d">
         <div class="p-4 border-b border-gray-200">
           <h2 class="text-xs font-bold text-gray-400 uppercase tracking-wider">Price Details</h2>
         </div>
@@ -232,8 +280,8 @@
             <span>- <%= formatPrice(totals.discount) %></span>
           </div>
 
-          <div class="flex justify-between">
-            <span>Delivery Charges</span>
+          <div class="flex justify-between" id="row-standard-shipping">
+            <span>Standard Delivery</span>
             <span>
               <% if (totals.shipping === 0) { %>
                 <span class="text-emerald-600 font-bold">FREE</span>
@@ -243,9 +291,14 @@
             </span>
           </div>
 
+          <div class="flex justify-between text-amber-700 font-bold hidden" id="row-express-fee">
+            <span class="flex items-center gap-1.5"><i class="fa-solid fa-bolt text-amber-500"></i> 10-Min Express Fee</span>
+            <span id="label-express-fee">+ <%= formatPrice(totals.expressFee || 29) %></span>
+          </div>
+
           <div class="border-t border-dashed border-gray-200 pt-3 flex justify-between text-sm font-black text-gray-900">
             <span>Total Payable</span>
-            <span><%= formatPrice(totals.grandTotal) %></span>
+            <span id="label-grand-total"><%= formatPrice(totals.grandTotal) %></span>
           </div>
 
           <% if (totals.discount > 0) { %>
@@ -265,6 +318,39 @@
 
   </div>
 </main>
+
+<script>
+  const baseGrandTotal = <%= totals.grandTotal %>;
+  const expressCharge = <%= totals.expressFee || 29 %>;
+
+  function updateDeliverySpeed(speed) {
+    const stdLabel = document.getElementById('label-delivery-standard');
+    const expLabel = document.getElementById('label-delivery-express');
+    const expressRow = document.getElementById('row-express-fee');
+    const grandTotalEl = document.getElementById('label-grand-total');
+
+    if (speed === '10_min_express') {
+      stdLabel.classList.remove('border-indigo-600', 'bg-indigo-50/40');
+      stdLabel.classList.add('border-slate-200', 'bg-white');
+
+      expLabel.classList.add('border-amber-500', 'bg-amber-50/40', 'shadow-md');
+      expLabel.classList.remove('border-slate-200', 'bg-white');
+
+      expressRow.classList.remove('hidden');
+      const newTotal = baseGrandTotal + expressCharge;
+      grandTotalEl.textContent = '₹' + newTotal.toLocaleString('en-IN');
+    } else {
+      stdLabel.classList.add('border-indigo-600', 'bg-indigo-50/40');
+      stdLabel.classList.remove('border-slate-200', 'bg-white');
+
+      expLabel.classList.remove('border-amber-500', 'bg-amber-50/40', 'shadow-md');
+      expLabel.classList.add('border-slate-200', 'bg-white');
+
+      expressRow.classList.add('hidden');
+      grandTotalEl.textContent = '₹' + baseGrandTotal.toLocaleString('en-IN');
+    }
+  }
+</script>
 
 <script src="/js/india-address.js"></script>
 <%- include('../partials/footer') %>
